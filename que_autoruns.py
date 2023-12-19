@@ -28,7 +28,7 @@ def main():
     # # E_min : [0.676, 0.84 , 1.269, 1.741, 2.12 , 2.609, 2.609, 3.586, 4.332, 5.475]
     # # E_max : [0.706, 0.868, 1.292, 1.759, 2.137, 2.624, 2.624, 3.598, 4.342, 5.484]
     E_mins = np.array([0.676, 0.676, 0.676, 0.676]) # MeV
-    E_maxes = np.array([2.624, 2.624, 2.624, 2.624]) # MeV
+    E_maxes = np.array([2.137, 2.137, 2.624, 2.624]) # MeV
     which_datas = ['som', 'som', 'som', 'som']
 
     # Select the parameterizations
@@ -39,18 +39,21 @@ def main():
     n_burns = [50000, 50000, 50000, 50000]
 
     # Use theory cov?
-    use_theory_covs = [True, True, True, True]
+    use_theory_covs = [False, True, False, True]
 
     # Always write a comment for the run (at least just '\n'!!)
-    comments = ['Restricted prior upper P1+, StretchMove, Overlap: [1.7 - 1.8]\n', 'Restricted prior lower P1+, StretchMove, Overlap: [1.7 - 1.8]\n',
-                'Restricted prior upper P1-, StretchMove, Overlap: [1.5 - 1.7]\n', 'Restricted prior lower P1-, StretchMove, Overlap: [1.5 - 1.7]\n']
+    comments = ['Run for VI paper: no theory cov, 0.7-2.1 som, stretchmove, 50,000:300,000 bs_C', 
+                'Run for VI paper: yes theory cov, 0.7-2.1 som, stretchmove, 50,000:300,000 bs_C',
+                'Run for VI paper: no theory cov, 0.7-2.6 som, stretchmove, 50,000:300,000 bs_C',
+                'Run for VI paper: yes theory cov, 0.7-2.6 som, stretchmove, 50,000:300,000 bs_C']
 
     # # # Optional:
     # Set a specific prior? (Default set to None)
-    params_bounds = [np.array([[-0.02, 0.06], [-3, 3], [5.0, 25.0], [1.7, 2.5], [5.0, 25.0], [-6, 6]]), 
-                     np.array([[-0.02, 0.06], [-3, 3], [5.0, 25.0], [1.4, 1.8], [5.0, 25.0], [-6, 6]]),
-                     np.array([[-0.02, 0.06], [-3, 3], [5.0, 25.0], [1.0, 2.5], [5.0, 25.0], [1.5, 2.5]]),
-                     np.array([[-0.02, 0.06], [-3, 3], [5.0, 25.0], [1.0, 2.5], [5.0, 25.0], [0.0, 1.7]])]
+    # params_bounds = [np.array([[-0.02, 0.06], [-3, 3], [5.0, 25.0], [1.7, 2.5], [5.0, 25.0], [-6, 6]]), 
+    #                  np.array([[-0.02, 0.06], [-3, 3], [5.0, 25.0], [1.4, 1.8], [5.0, 25.0], [-6, 6]]),
+    #                  np.array([[-0.02, 0.06], [-3, 3], [5.0, 25.0], [1.0, 2.5], [5.0, 25.0], [1.5, 2.5]]),
+    #                  np.array([[-0.02, 0.06], [-3, 3], [5.0, 25.0], [1.0, 2.5], [5.0, 25.0], [0.0, 1.7]])]
+    params_bounds = [None, None, None, None]
     params_priors = [None, None, None, None]
 
     # params_bounds = [np.array([[-0.02, 0.06], [-3, 3], [5.0, 25.0], [1.70, 3], [5.0, 25.0], [-6, 6]])]
