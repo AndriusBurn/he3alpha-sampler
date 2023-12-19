@@ -35,7 +35,7 @@ def main():
     parameterizations = ['bs_C', 'bs_C', 'bs_C', 'bs_C']
 
     # Parameters for the MCMC sampling
-    n_steps = [200000, 200000, 200000, 200000]
+    n_steps = [300000, 300000, 300000, 300000]
     n_burns = [50000, 50000, 50000, 50000]
 
     # Use theory cov?
