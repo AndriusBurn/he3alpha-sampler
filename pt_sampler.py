@@ -24,31 +24,34 @@ def main():
     # # Select the data subsets to use
     # # E_min : [0.676, 0.84 , 1.269, 1.741, 2.12 , 2.609, 2.609, 3.586, 4.332, 5.475]
     # # E_max : [0.706, 0.868, 1.292, 1.759, 2.137, 2.624, 2.624, 3.598, 4.342, 5.484]
-    E_mins = np.array([0.676]) # MeV
-    E_maxes = np.array([2.624]) # MeV
-    which_datas = ['som']
+    E_mins = np.array([0.676, 0.676, 0.676, 0.676]) # MeV
+    E_maxes = np.array([2.137, 2.137, 2.624, 2.624]) # MeV
+    which_datas = ['som', 'som', 'som', 'som']
 
     # Select the parameterizations
-    parameterizations = ['bs_C']
+    parameterizations = ['bs_C', 'bs_C', 'bs_C', 'bs_C']
 
     # Parameters for the MCMC sampling
-    n_steps = [50000]
-    n_burns = [10000]
+    n_steps = [50000, 50000, 50000, 50000]
+    n_burns = [10000, 10000, 10000, 10000]
 
     # Parameters to set the number of different temperatures
-    n_temps_lows = [5] 
-    n_temps_highs = [5]
+    n_temps_lows = [5, 5, 5, 5] 
+    n_temps_highs = [5, 5, 5, 5]
 
     # Use theory cov?
-    use_theory_covs = [True]
+    use_theory_covs = [False, True, False, True]
 
     # Always write a comment for the run (at least just '\n'!!)
-    comments = ['Unrestricted prior\nUsing ptemcee\n']
+    comments = ['Run for VI paper: no theory cov, 0.7-2.1 som, ptemcee, 10,000:50,000 bs_C, 5 low 5 high temps', 
+                'Run for VI paper: yes theory cov, 0.7-2.1 som, ptemcee, 10,000:50,000 bs_C, 5 low 5 high temps',
+                'Run for VI paper: no theory cov, 0.7-2.6 som, ptemcee, 10,000:50,000 bs_C, 5 low 5 high temps',
+                'Run for VI paper: yes theory cov, 0.7-2.6 som, ptemcee, 10,000:50,000 bs_C, 5 low 5 high temps']
 
     # # # Optional:
     # Set a specific prior? (Default set to None)
-    params_bounds = [None]
-    params_priors = [None]
+    params_bounds = [None, None, None, None]
+    params_priors = [None, None, None, None]
 
     # params_bounds = [np.array([[-0.02, 0.06], [-3, 3], [5.0, 25.0], [1.70, 3], [5.0, 25.0], [-6, 6]])]
     # params_priors = [np.array([[0.025, 0.015], [0.8, 0.4], [13.84, 1.63], [2.0, 1.6], [12.59, 1.85], [0.0, 1.6]])]
