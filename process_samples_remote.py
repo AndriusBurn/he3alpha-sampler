@@ -4,7 +4,7 @@ import sys; sys.path.append('./')
 import models
 from data_loader import DataLoader
 import emcee, corner, os
-from sklearn.covariance import EmpiricalCovariance
+# from sklearn.covariance import EmpiricalCovariance
 import numpy.linalg as lin
 import seaborn as sns
 import matplotlib
