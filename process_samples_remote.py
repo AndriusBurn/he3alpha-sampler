@@ -25,13 +25,11 @@ def process(directory):
         parameterization = content[int(content.find('model: ') + 7):int(content.find('\n'))]
         use_theory_cov = content[int(content.find('covariance: ') + 11):int(content.find('\n'))]
 
-
-
     # Get the file name
     file_name = directory + '/' + [i for i in os.listdir(directory) if i.endswith('.h5')][0]
 
     # print(E_min, E_max, n_burn, n_steps, which_data, parameterization, use_theory_cov, file_name)    
-
+    
     # # # # # Run the analysis from the notebook
 
     # Load the corresponding data
