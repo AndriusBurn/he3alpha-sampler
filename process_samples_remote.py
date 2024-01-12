@@ -25,7 +25,7 @@ def process(directory):
         parameterization = content[int(content.find('model: ') + 6):int(content.find('\n'))]
         use_theory_cov = content[int(content.find('covariance: ') + 11):int(content.find('\n'))]
 
-    print(E_min, E_max, n_burn, n_steps, which_data, parameterization, use_theory_cov, file_name)
+    print(E_min, E_max, n_burn, n_steps, which_data, parameterization, use_theory_cov)
     sys.exit(-1)
     # Get the file name
     file_name = [i for i in os.listdir(directory) if i.endswith('.h5')][0]
