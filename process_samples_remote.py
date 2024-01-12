@@ -21,15 +21,17 @@ def process(directory):
         E_max = float(content[int(content.find('E_max ') + 6):int(content.find('E_max ') + 6) + 5])
         n_burn = int(content[int(content.find(' steps, ') + 7):int(content.find(' burn in'))])
         n_steps = int(content[int(content.find('Run with ') + 8):int(content.find(' steps,'))])
-        which_data = content[int(content.find('Analyzing ') + 9):int(content.find(' data with'))]
-        parameterization = content[int(content.find('model: ') + 6):int(content.find('\n'))]
+        which_data = content[int(content.find('Analyzing ') + 10):int(content.find(' data with'))]
+        parameterization = content[int(content.find('model: ') + 7):int(content.find('\n'))]
         use_theory_cov = content[int(content.find('covariance: ') + 11):int(content.find('\n'))]
 
-    print(E_min, E_max, n_burn, n_steps, which_data, parameterization, use_theory_cov, file_name)
-    sys.exit(-1)
+
+
     # Get the file name
-    file_name = [i for i in os.listdir(directory) if i.endswith('.h5')][0]
-    
+    file_name = directory + '/' + [i for i in os.listdir(directory) if i.endswith('.h5')][0]
+
+    # print(E_min, E_max, n_burn, n_steps, which_data, parameterization, use_theory_cov, file_name)    
+
     # # # # # Run the analysis from the notebook
 
     # Load the corresponding data
@@ -124,7 +126,7 @@ def process(directory):
     # Generate the corner plot
     corner.corner(samples[:, :model.erp_dim], labels = labels[:model.erp_dim], quantiles = [0.16, 0.5, 0.84], title_fmt = '.4f', show_titles = True)
     plt.suptitle("E_min = {} MeV, E_max = {} MeV, {} data".format(E_min, E_max, which_data))
-    plt.savefig('corner_plot.png')
+    plt.savefig(directory + '/corner_plot.png')
 
 
 
