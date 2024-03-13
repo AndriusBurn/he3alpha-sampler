@@ -67,7 +67,7 @@ class DataLoader(object):
     def get_normalization_grouping(self):
         """
         This returns an array that is used to group the data together. Indices of like
-        values in this array, should have the same normalization coefficient attached to 
+        values in this array should have the same normalization coefficient attached to 
         them in the log-likelihood.
         """
         # Define the array of data points for each interaction region and energy

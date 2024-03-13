@@ -70,6 +70,12 @@ class BaseModel:
         self.inv_cov_matrix = np.linalg.inv(cov_matrix)
         self.Q_rest = np.sum(np.log(1.0 / np.sqrt(2.0 * np.pi * np.diag(cov_matrix))))
         
+        # Store the numerator of Q
+        # Get the momentum transfer
+        q = 2.0 * self.kvalue_cs * np.sin((self.theta_cs * np.pi / 180) / 2.0)
+        self.Q_numerator = np.array([max(q[t], self.kvalue_cs[t])
+                    for t in range(len(self.theta_cs))]).real
+
         ##############################################################################
                             # Define the binding energy of the 7Be #
         ##############################################################################
