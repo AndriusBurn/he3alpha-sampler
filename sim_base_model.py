@@ -329,7 +329,9 @@ class SimBaseModel:
         """
         theory = np.asarray(theory)
         r = norm * theory - self.cs_data
-        chi_2 = r.transpose() @ self.inverse_cov_matrix @ r
+        # chi_2 = r.transpose() @ self.inverse_cov_matrix @ r
+        # chi_squared = np.dot(residuals.T, np.linalg.solve(covariance_matrix, residuals))
+        chi_2 = np.dot(r.T, np.linalg.solve(self.cov_matrix, r))
         return chi_2, r
 
 
