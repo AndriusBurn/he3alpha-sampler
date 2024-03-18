@@ -412,7 +412,9 @@ class SimBaseModel:
     def log_prior_c_bar_squared(self, c_bar_squared):
         # Explicitly write out the log
         # return np.log(1 / c_bar_squared**(0.5 * (self.n_c + 2 + self.nu_0)) * np.exp(-(self.nu * self.Tau**2) / 2 * c_bar_squared))
-        return -(0.5 * (self.n_c + 2 + self.nu_0)) * np.log(c_bar_squared) - ((self.nu * self.Tau**2) / 2 * c_bar_squared)
+        # return -(0.5 * (self.n_c + 2 + self.nu_0)) * np.log(c_bar_squared) - ((self.nu * self.Tau**2) / 2 * c_bar_squared)
+        return ((self.nu / 2) * np.log(self.nu * np.square(self.Tau) / 2) - np.log(gamma(self.nu / 2)) - 
+                (1 + self.nu / 2) * np.log(c_bar_squared) - (self.nu * np.square(self.Tau) / (2 * c_bar_squared)))
 
 
     ##############################################################################
