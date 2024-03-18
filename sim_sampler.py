@@ -35,8 +35,8 @@ def main():
     parameterizations = ['sim_bs_C']
 
     # Parameters of sampling
-    n_steps = [1000]
-    n_burns = [500]
+    n_steps = [10000]
+    n_burns = [5000]
 
     # Use theory cov?
     use_theory_covs = [True]
