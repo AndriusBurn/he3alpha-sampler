@@ -83,6 +83,7 @@ class SimBaseModel:
         self.inverse_cov_matrix = None
         self.Q_rest = None
         self.lambda_b_norm_scale = None
+        self.c_squared_sum = None
 
         ##############################################################################
                             # Define the binding energy of the 7Be #
@@ -382,39 +383,102 @@ class SimBaseModel:
     ##############################################################################
 
 
+    # def tau_function(self, Lambda_B):
+    #     c1s = (self.y1s - self.cs_LO_values) / (self.cs_LO_values * (self.Q_numerator / Lambda_B))
+    #     c2s = (self.y2s - self.y1s) / (self.cs_LO_values * np.square((self.Q_numerator / Lambda_B)))
+    #     return 
+
+    # def set_lambda_b_norm_scale(self):
+    #     vals = []
+    #     Lambda_Bs = np.linspace(np.max(self.Q_numerator) + 0.00001, 4, 100)
+    #     for Lambda_B in Lambda_Bs:
+    #         vals.append(np.log(self.prior_Lambda_B(Lambda_B)) - self.nu * np.log(self.Tau) - 3 * np.sum(np.log(self.Q_numerator / Lambda_B)))
+    #     self.lambda_b_norm_scale = np.max(np.array(vals))
+
+    # def prior_Lambda_B(self, Lambda_B):
+    #     return np.where(
+    #         np.logical_and(Lambda_B > np.max(self.Q_numerator), Lambda_B <= 4.0),
+    #                        1 / (np.sqrt(2 * np.pi) * 0.7) * np.exp(-np.square((Lambda_B - 1.0) / (2 * 0.7**2))), 0)
+
+    # def exp_log_unnorm_Lambda_B(self, Lambda_B):
+    #     val = (np.log(self.prior_Lambda_B(Lambda_B)) - self.nu * np.log(self.Tau) - 3 * np.sum(np.log(self.Q_numerator / Lambda_B))) - self.lambda_b_norm_scale
+    #     return np.exp(val)
+    
+    # # def exp_log_unnorm_Lambda_B_2(self, Lambda_B):
+    # #     val = np.log(self.prior_Lambda_B(Lambda_B)) - self.nu * np.log(self.Tau) - 3 * np.sum(np.log(self.Q_numerator / Lambda_B))
+    # #     return np.exp(val)
+
+    # def log_prior_Lambda_B(self, Lambda_B):
+    #     A = quad(self.exp_log_unnorm_Lambda_B, np.max(self.Q_numerator) + 0.00001, 3.999)[0]
+    #     # print('\nA: {}\n'.format(A))
+    #     # print('A: {}'.format(A))
+    #     if A == 0.0 or self.prior_Lambda_B(Lambda_B) == 0.0:
+    #         # print(Lambda_B, A, self.prior_Lambda_B(Lambda_B))
+    #         return -np.inf
+    #     else:
+    #         # return np.log(self.exp_log_unnorm_Lambda_B(Lambda_B)) - np.log(A)
+
+    #         return ((np.log(self.prior_Lambda_B(Lambda_B)) - self.nu * np.log(self.Tau) - 
+    #              3 * np.sum(np.log(self.Q_numerator / Lambda_B))) - np.log(A)) 
+            
+            
+    #         # return ((np.log(self.prior_Lambda_B(Lambda_B)) - self.nu * np.log(self.Tau) - 
+    #         #      3 * np.sum(np.log(self.Q_numerator / Lambda_B))) - self.lambda_b_norm_scale - np.log(A))
+
+    ##############################################################################
+    ##############################################################################
+
+    def get_c_squared_sum(self, Lambda_B):
+        c2s = (self.y2s - self.y1s) / (self.cs_LO_values * np.square(self.Q_numerator / Lambda_B))
+        c1s = (self.y1s - self.cs_LO_values) / (self.cs_LO_values * (self.Q_numerator / Lambda_B))
+        return np.sum(np.square(c2s) + np.square(c1s))
+
+    def get_Tau(self, Lambda_B):
+        return np.sqrt((self.nu_0 * self.Tau_0**2 + self.get_c_squared_sum(Lambda_B)) / self.nu)
+    
     def set_lambda_b_norm_scale(self):
         vals = []
         Lambda_Bs = np.linspace(np.max(self.Q_numerator) + 0.00001, 4, 100)
         for Lambda_B in Lambda_Bs:
-            vals.append(np.log(self.prior_Lambda_B(Lambda_B)) - self.nu * np.log(self.Tau) - 3 * np.sum(np.log(self.Q_numerator / Lambda_B)))
-        self.lambda_b_norm_scale = np.max(vals)
-
+            vals.append(np.log(self.prior_Lambda_B(Lambda_B)) - self.nu * np.log(self.get_Tau(Lambda_B)) - 3 * np.sum(np.log(self.Q_numerator / Lambda_B)))
+        self.lambda_b_norm_scale = np.max(np.array(vals))
+    
     def prior_Lambda_B(self, Lambda_B):
         return np.where(
-            np.logical_and(np.logical_and(Lambda_B >= 0, Lambda_B <= 4.0), 
-                           Lambda_B > np.max(self.Q_numerator)), 
+            np.logical_and(Lambda_B > np.max(self.Q_numerator), Lambda_B <= 4.0),
                            1 / (np.sqrt(2 * np.pi) * 0.7) * np.exp(-np.square((Lambda_B - 1.0) / (2 * 0.7**2))), 0)
 
     def exp_log_unnorm_Lambda_B(self, Lambda_B):
-        val = (np.log(self.prior_Lambda_B(Lambda_B)) - self.nu * np.log(self.Tau) - 3 * np.sum(np.log(self.Q_numerator / Lambda_B))) - self.lambda_b_norm_scale
-        return np.exp(val)
-    
-    def exp_log_unnorm_Lambda_B_2(self, Lambda_B):
-        val = np.log(self.prior_Lambda_B(Lambda_B)) - self.nu * np.log(self.Tau) - 3 * np.sum(np.log(self.Q_numerator / Lambda_B))
+        val = (np.log(self.prior_Lambda_B(Lambda_B)) - self.nu * np.log(self.get_Tau(Lambda_B)) - 3 * np.sum(np.log(self.Q_numerator / Lambda_B))) - self.lambda_b_norm_scale
         return np.exp(val)
 
     def log_prior_Lambda_B(self, Lambda_B):
         A = quad(self.exp_log_unnorm_Lambda_B, np.max(self.Q_numerator) + 0.00001, 3.999)[0]
-        # print('\nA: {}\n'.format(A))
-        return ((np.log(self.prior_Lambda_B(Lambda_B)) - self.nu * np.log(self.Tau) - 
-                 3 * np.sum(np.log(self.Q_numerator / Lambda_B))) - self.lambda_b_norm_scale - np.log(A))
+        if A == 0.0 or self.prior_Lambda_B(Lambda_B) == 0.0:
+            return -np.inf
+        else:
+            return np.log(self.exp_log_unnorm_Lambda_B(Lambda_B)) - np.log(A)
+
+            # return ((np.log(self.prior_Lambda_B(Lambda_B)) - self.nu * np.log(self.Tau) - 
+            #      3 * np.sum(np.log(self.Q_numerator / Lambda_B))) - np.log(A)) 
+        
+    ##############################################################################
+    ##############################################################################
 
     def log_prior_c_bar_squared(self, c_bar_squared):
         # Explicitly write out the log
         # return np.log(1 / c_bar_squared**(0.5 * (self.n_c + 2 + self.nu_0)) * np.exp(-(self.nu * self.Tau**2) / 2 * c_bar_squared))
         # return -(0.5 * (self.n_c + 2 + self.nu_0)) * np.log(c_bar_squared) - ((self.nu * self.Tau**2) / 2 * c_bar_squared)
-        return ((self.nu / 2) * np.log(self.nu * np.square(self.Tau) / 2) - np.log(gamma(self.nu / 2)) - 
+    
+        # return - (self.nu * np.square(self.Tau) / (2 * c_bar_squared)) - 0.5 * (self.n_c + 2 + self.nu_0) * np.log(c_bar_squared)
+
+        # # This function is the same as below, just with the gamma piece removed
+        return ((self.nu / 2) * np.log(self.nu * np.square(self.Tau) / 2) -
                 (1 + self.nu / 2) * np.log(c_bar_squared) - (self.nu * np.square(self.Tau) / (2 * c_bar_squared)))
+        
+        # # This function has the whole inverse chi^2 distribution, the gamma piece is numerically problematic
+        # return ((self.nu / 2) * np.log(self.nu * np.square(self.Tau) / 2) - np.log(gamma(self.nu / 2)) - 
+        #         (1 + self.nu / 2) * np.log(c_bar_squared) - (self.nu * np.square(self.Tau) / (2 * c_bar_squared)))
 
 
     ##############################################################################
@@ -488,15 +552,22 @@ class SimBaseModel:
         # print('\n\nc_bar^2: {}\nlambda_B: {}\nparams: {}\nparams_f: {}\n\n'.format(c_bar_squared, Lambda_B, params, params_f))
 
         # Perform model evaluations to get y1s, y2s
-        y1s = self.cs_theory(params, order = 1)
-        y2s = self.cs_theory(params, order = 2)
+        self.y1s = self.cs_theory(params, order = 1)
+        self.y2s = self.cs_theory(params, order = 2)
+        ###############################################################
+        ###############################################################
+        # # # Attempt number 2....
+        ###############################################################
+        ###############################################################
 
-        # Compute c1s, c2s
-        c1s = (y1s - self.cs_LO_values) / (self.cs_LO_values * (self.Q_numerator / Lambda_B))
-        c2s = (y2s - y1s) / (self.cs_LO_values * np.square((self.Q_numerator / Lambda_B)))
+        ###############################################################
+        ###############################################################
+        # # Compute c1s, c2s
+        # c1s = (self.y1s - self.cs_LO_values) / (self.cs_LO_values * (self.Q_numerator / Lambda_B))
+        # c2s = (self.y2s - self.y1s) / (self.cs_LO_values * np.square((self.Q_numerator / Lambda_B)))
 
-        # Update the hyper parameter Tau
-        self.Tau = np.sqrt((self.nu_0 * self.Tau_0**2 + np.sum(np.square(c1s) + np.square(c2s))) / self.nu)
+        # # Update the hyper parameter Tau
+        # self.Tau = np.sqrt((self.nu_0 * self.Tau_0**2 + np.sum(np.square(c1s) + np.square(c2s))) / self.nu)
 
         # Set the new covariance matrix (self.cov_matrix, self.inverse_cov_matrix, and self.Q_rest)
         self.set_cov_matrix(c_bar_squared, Lambda_B)
@@ -507,7 +578,21 @@ class SimBaseModel:
         # Get the log "prior" P(Lambda_B | theta, I)
         self.set_lambda_b_norm_scale()
         lambda_b_log_prior = self.log_prior_Lambda_B(Lambda_B)
+        ###############################################################
+        ###############################################################
+        ###############################################################
+        ###############################################################
+        ###############################################################
+        # # # TAU IS A FUNCTION OF LAMBDA_B!!!!!!!!!!!!!!
+        # # # Everywhere inside this normalization routine, you must
+        # # # include Lambda_B dependency!!!!
+        ###############################################################
+        ###############################################################
+        ###############################################################
+        ###############################################################
+        ###############################################################
 
+        # return lambda_b_log_prior
         # Compute the log "prior" P(c_bar^2 | Lambda_B, theta, I)
         c_bar_squared_log_prior = self.log_prior_c_bar_squared(c_bar_squared)
 
