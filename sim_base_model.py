@@ -569,6 +569,10 @@ class SimBaseModel:
         # # Update the hyper parameter Tau
         # self.Tau = np.sqrt((self.nu_0 * self.Tau_0**2 + np.sum(np.square(c1s) + np.square(c2s))) / self.nu)
 
+        # Check for negative c_bar^2 and Lambda_B
+        if (c_bar_squared <= 0) or (Lambda_B <= 0):
+            return -np.inf
+        
         # Set the new covariance matrix (self.cov_matrix, self.inverse_cov_matrix, and self.Q_rest)
         self.set_cov_matrix(c_bar_squared, Lambda_B)
 
