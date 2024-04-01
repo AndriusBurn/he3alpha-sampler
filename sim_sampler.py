@@ -28,21 +28,21 @@ def main():
     # # E_min : [0.676, 0.84 , 1.269, 1.741, 2.12 , 2.609, 2.609, 3.586, 4.332, 5.475]
     # # E_max : [0.706, 0.868, 1.292, 1.759, 2.137, 2.624, 2.624, 3.598, 4.342, 5.484]
     E_mins = np.array([0.676])
-    E_maxes = np.array([2.624])
+    E_maxes = np.array([1.759])
     which_datas = ['som']
 
     # Select the model
     parameterizations = ['sim_bs_C']
 
     # Parameters of sampling
-    n_steps = [10000]
-    n_burns = [5000]
+    n_steps = [100000]
+    n_burns = [10000]
 
     # Use theory cov?
     use_theory_covs = [True]
 
     # Always write a comment for the run (at least just '\n')!
-    comments = ['Test run for the code']
+    comments = ['Second run for results\n']
 
     # # # Optional # # #
     # Set a specific prior? (Default set: None)
