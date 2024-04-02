@@ -12,8 +12,28 @@ from scipy.special import psi, gamma
 from scipy.misc import derivative
 from scipy.integrate import quad
 from scipy.linalg import det
-import os, tqdm, pickle
+import os, tqdm, pickle, scipy
 from numpy import typing as npt
+from functools import wraps
+import time
+import cProfile, pstats
+
+def get_time(func):
+    """
+    Times any function.
+    """
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        start_time = time.perf_counter()
+
+        func(*args, *kwargs)
+
+        end_time = time.perf_counter()
+        total_time = round(end_time - start_time, 3)
+
+        print('Time: {} seconds'.format(total_time))
+
+    return wrapper
 
 
 class SimBaseModel:
@@ -78,12 +98,15 @@ class SimBaseModel:
         self.Q_numerator = np.array([max(q[t], self.kvalue_cs[t])
                     for t in range(len(self.theta_cs))]).real
         
+        self.exp_piece = np.diag(self.err_cs**2)
         self.use_theory_cov = use_theory_cov
         self.cov_matrix = None
         self.inverse_cov_matrix = None
         self.Q_rest = None
         self.lambda_b_norm_scale = None
         self.c_squared_sum = None
+        self.c_denom_1 = self.cs_LO_values * self.Q_numerator
+        self.c_denom_2 = self.cs_LO_values * np.square(self.Q_numerator)
 
         ##############################################################################
                             # Define the binding energy of the 7Be #
@@ -289,23 +312,20 @@ class SimBaseModel:
 
     def set_cov_matrix(self, c_bar_squared, Lambda_B):
         theory_piece = self.cov_theory(c_bar_squared, Lambda_B)
-        exp_piece = np.diag(self.err_cs**2)
+        
         if self.use_theory_cov:
-            self.cov_matrix = theory_piece + exp_piece
+            self.cov_matrix = theory_piece + self.exp_piece
         else:
-            self.cov_matrix = exp_piece
-        self.inverse_cov_matrix = np.linalg.inv(self.cov_matrix)
+            self.cov_matrix = self.exp_piece
+        # self.inverse_cov_matrix = np.linalg.inv(self.cov_matrix)
         eigenvals = np.linalg.eigvalsh(self.cov_matrix)
-        # print('eigenvals: {}'.format(eigenvals))
 
         if np.any(eigenvals == 0):
             self.Q_rest = -np.inf
         else:
             log_det = np.sum(np.log(eigenvals))
             self.Q_rest = -0.5 * (np.log(2 * np.pi) + log_det)
-
-        # print(log_det)
-        return True
+        # return True
         
 
     ##############################################################################
@@ -382,55 +402,12 @@ class SimBaseModel:
     ##############################################################################
     ##############################################################################
 
-
-    # def tau_function(self, Lambda_B):
-    #     c1s = (self.y1s - self.cs_LO_values) / (self.cs_LO_values * (self.Q_numerator / Lambda_B))
-    #     c2s = (self.y2s - self.y1s) / (self.cs_LO_values * np.square((self.Q_numerator / Lambda_B)))
-    #     return 
-
-    # def set_lambda_b_norm_scale(self):
-    #     vals = []
-    #     Lambda_Bs = np.linspace(np.max(self.Q_numerator) + 0.00001, 4, 100)
-    #     for Lambda_B in Lambda_Bs:
-    #         vals.append(np.log(self.prior_Lambda_B(Lambda_B)) - self.nu * np.log(self.Tau) - 3 * np.sum(np.log(self.Q_numerator / Lambda_B)))
-    #     self.lambda_b_norm_scale = np.max(np.array(vals))
-
-    # def prior_Lambda_B(self, Lambda_B):
-    #     return np.where(
-    #         np.logical_and(Lambda_B > np.max(self.Q_numerator), Lambda_B <= 4.0),
-    #                        1 / (np.sqrt(2 * np.pi) * 0.7) * np.exp(-np.square((Lambda_B - 1.0) / (2 * 0.7**2))), 0)
-
-    # def exp_log_unnorm_Lambda_B(self, Lambda_B):
-    #     val = (np.log(self.prior_Lambda_B(Lambda_B)) - self.nu * np.log(self.Tau) - 3 * np.sum(np.log(self.Q_numerator / Lambda_B))) - self.lambda_b_norm_scale
-    #     return np.exp(val)
-    
-    # # def exp_log_unnorm_Lambda_B_2(self, Lambda_B):
-    # #     val = np.log(self.prior_Lambda_B(Lambda_B)) - self.nu * np.log(self.Tau) - 3 * np.sum(np.log(self.Q_numerator / Lambda_B))
-    # #     return np.exp(val)
-
-    # def log_prior_Lambda_B(self, Lambda_B):
-    #     A = quad(self.exp_log_unnorm_Lambda_B, np.max(self.Q_numerator) + 0.00001, 3.999)[0]
-    #     # print('\nA: {}\n'.format(A))
-    #     # print('A: {}'.format(A))
-    #     if A == 0.0 or self.prior_Lambda_B(Lambda_B) == 0.0:
-    #         # print(Lambda_B, A, self.prior_Lambda_B(Lambda_B))
-    #         return -np.inf
-    #     else:
-    #         # return np.log(self.exp_log_unnorm_Lambda_B(Lambda_B)) - np.log(A)
-
-    #         return ((np.log(self.prior_Lambda_B(Lambda_B)) - self.nu * np.log(self.Tau) - 
-    #              3 * np.sum(np.log(self.Q_numerator / Lambda_B))) - np.log(A)) 
-            
-            
-    #         # return ((np.log(self.prior_Lambda_B(Lambda_B)) - self.nu * np.log(self.Tau) - 
-    #         #      3 * np.sum(np.log(self.Q_numerator / Lambda_B))) - self.lambda_b_norm_scale - np.log(A))
-
-    ##############################################################################
-    ##############################################################################
-
     def get_c_squared_sum(self, Lambda_B):
-        c2s = (self.y2s - self.y1s) / (self.cs_LO_values * np.square(self.Q_numerator / Lambda_B))
-        c1s = (self.y1s - self.cs_LO_values) / (self.cs_LO_values * (self.Q_numerator / Lambda_B))
+        # c2s = (self.y2s - self.y1s) / (self.cs_LO_values * np.square(self.Q_numerator / Lambda_B))
+        # c1s = (self.y1s - self.cs_LO_values) / (self.cs_LO_values * (self.Q_numerator / Lambda_B))
+        c1s = (self.y1s - self.cs_LO_values) / (self.c_denom_1 / Lambda_B)
+        # c2s = (self.y2s - self.y1s) / (self.c_denom_2 / np.square(Lambda_B))
+        c2s = (self.y2s - self.y1s) / (self.c_denom_2 / Lambda_B**2)
         return np.sum(np.square(c2s) + np.square(c1s))
 
     def get_Tau(self, Lambda_B):
@@ -444,9 +421,18 @@ class SimBaseModel:
         self.lambda_b_norm_scale = np.max(np.array(vals))
     
     def prior_Lambda_B(self, Lambda_B):
-        return np.where(
-            np.logical_and(Lambda_B > np.max(self.Q_numerator), Lambda_B <= 4.0),
-                           1 / (np.sqrt(2 * np.pi) * 0.7) * np.exp(-np.square((Lambda_B - 1.0) / (2 * 0.7**2))), 0)
+        """
+        Prior for Lambda_B
+        Truncated Gaussian with lower bound being defined by the maximum value in the numerator of Q, upper bound is 4.0.
+        Mean: 1.0, sigma: 0.7
+        """
+        # return np.where(
+        #     np.logical_and(Lambda_B > np.max(self.Q_numerator), Lambda_B <= 4.0),
+        #                    1 / (np.sqrt(2 * np.pi) * 0.7) * np.exp(-np.square((Lambda_B - 1.0) / (2 * 0.7**2))), 0)
+        if Lambda_B > np.max(self.Q_numerator) and Lambda_B <= 4.0:
+            return 1 / (np.sqrt(2 * np.pi) * 0.7) * np.exp(-np.square((Lambda_B - 1.0) / (2 * 0.7**2)))
+        else:
+            return 0
 
     def exp_log_unnorm_Lambda_B(self, Lambda_B):
         val = (np.log(self.prior_Lambda_B(Lambda_B)) - self.nu * np.log(self.get_Tau(Lambda_B)) - 3 * np.sum(np.log(self.Q_numerator / Lambda_B))) - self.lambda_b_norm_scale
@@ -458,27 +444,12 @@ class SimBaseModel:
             return -np.inf
         else:
             return np.log(self.exp_log_unnorm_Lambda_B(Lambda_B)) - np.log(A)
-
-            # return ((np.log(self.prior_Lambda_B(Lambda_B)) - self.nu * np.log(self.Tau) - 
-            #      3 * np.sum(np.log(self.Q_numerator / Lambda_B))) - np.log(A)) 
         
-    ##############################################################################
-    ##############################################################################
-
     def log_prior_c_bar_squared(self, c_bar_squared):
-        # Explicitly write out the log
-        # return np.log(1 / c_bar_squared**(0.5 * (self.n_c + 2 + self.nu_0)) * np.exp(-(self.nu * self.Tau**2) / 2 * c_bar_squared))
-        # return -(0.5 * (self.n_c + 2 + self.nu_0)) * np.log(c_bar_squared) - ((self.nu * self.Tau**2) / 2 * c_bar_squared)
-    
-        # return - (self.nu * np.square(self.Tau) / (2 * c_bar_squared)) - 0.5 * (self.n_c + 2 + self.nu_0) * np.log(c_bar_squared)
-
-        # # This function is the same as below, just with the gamma piece removed
+        # # This function has the whole inverse chi^2 distribution, the gamma piece is numerically problematic so it is removed
         return ((self.nu / 2) * np.log(self.nu * np.square(self.Tau) / 2) -
                 (1 + self.nu / 2) * np.log(c_bar_squared) - (self.nu * np.square(self.Tau) / (2 * c_bar_squared)))
-        
-        # # This function has the whole inverse chi^2 distribution, the gamma piece is numerically problematic
-        # return ((self.nu / 2) * np.log(self.nu * np.square(self.Tau) / 2) - np.log(gamma(self.nu / 2)) - 
-        #         (1 + self.nu / 2) * np.log(c_bar_squared) - (self.nu * np.square(self.Tau) / (2 * c_bar_squared)))
+    
 
 
     ##############################################################################
@@ -617,7 +588,7 @@ class SimBaseModel:
 
 
 def main():
-    E_min = 1.269 # MeV
+    E_min = 0.676 # MeV
     E_max = 2.624 # MeV
     which_data = 'som'
 
@@ -634,9 +605,17 @@ def main():
     gauss_prior_f = loader.get_normalization_prior_info()
 
     # Set up the base model
-    base = SimBaseModel(data, norm_grouping, gauss_prior_params, gauss_prior_f, True)
-    test = np.concatenate([[20], [100], gauss_prior_params[:, 2], gauss_prior_f[:, 2]])
-    base.log_posterior(test)
+    import sim_models
+    model = sim_models.Sim_BS_C(data, norm_grouping, gauss_prior_params, gauss_prior_f, True)
+    test = np.concatenate([[1.0], [0.8], gauss_prior_params[:, 2], gauss_prior_f[:, 2]])
+
+    with cProfile.Profile() as profile:
+        for i in range(0, 300):
+            model.log_posterior(test)
+
+    results = pstats.Stats(profile)
+    results.sort_stats(pstats.SortKey.TIME)
+    results.print_stats()
 
 if __name__ == "__main__":
     main()
