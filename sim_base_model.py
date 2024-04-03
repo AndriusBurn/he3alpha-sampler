@@ -14,6 +14,7 @@ from scipy.integrate import quad
 from scipy.linalg import det
 import os, tqdm, pickle, scipy
 from numpy import typing as npt
+from typing import Tuple
 from functools import wraps
 import time
 import cProfile, pstats
@@ -159,79 +160,79 @@ class SimBaseModel:
     ##############################################################################
     #                                  Define Utility Functions
     ##############################################################################
-    def sqrt(self, x):
+    def sqrt(self, x : npt.ArrayLike) -> npt.ArrayLike:
         # Returns a complex value if negative
         return np.where(x >= 0, np.sqrt(x), 1.j * np.sqrt(np.abs(x)))
     
-    def cot(self, theta_deg):
+    def cot(self, theta_deg : npt.ArrayLike) -> npt.ArrayLike:
         # Cotangent with angle measured in degrees
         return (np.cos(theta_deg * (np.pi / 180)) /
                         np.sin(theta_deg * (np.pi / 180)))
     
-    def ECM(self, Elab):
+    def ECM(self, Elab : npt.ArrayLike) -> npt.ArrayLike:
         # Convert energy from lab frame to CM frame
         return ((2 * self.mt) / (self.mt + self.mb +
                         self.sqrt(((self.mt + self.mb)**2) +
                         2 * self.mt * Elab))) * Elab  #MeV
 
-    def ELAB(self, Ecm):
+    def ELAB(self, Ecm : npt.ArrayLike) -> npt.ArrayLike:
         # Convert energy from CM from to lab frame
         return ((Ecm + (2 * (self.mt + self.mb))) /
                         (2.0 * self.mt)) * Ecm  #MeV 
     
-    def kc(self, Elab):
+    def kc(self, Elab : npt.ArrayLike) -> npt.ArrayLike:
         # Obtain kc as a function of Elab
         return self.Zb * self.Zt * self.alpha * (
                         (self.mu + self.ECM(Elab)) / self.h_bar_c)  # fm^-1
 
-    def k(self, Elab):
+    def k(self, Elab : npt.ArrayLike) -> npt.ArrayLike:
         # Obtain k as a function of Elab
         return (1 / self.h_bar_c) * self.sqrt(
                         ((self.mu + self.ECM(Elab))**2) - self.mu**2)
     
-    def eta(self, Elab):
+    def eta(self, Elab : npt.ArrayLike) -> npt.ArrayLike:
         # Obtain eta as a function of Elab
         return self.kc(Elab) / self.k(Elab)
     
-    def H(self, Elab):
+    def H(self, Elab : npt.ArrayLike) -> npt.ArrayLike:
         # Obtain H as a function of Elab
         return ((psi((1.j) * self.eta(Elab))) +
                             (1 / (2.j * self.eta(Elab))) -
                             np.log(1.j * self.eta(Elab)))
     
-    def h(self, Elab):
+    def h(self, Elab : npt.ArrayLike) -> npt.ArrayLike:
         # Get the real part of H
         return self.H(Elab).real
     
-    def C0_2(self, Elab):
+    def C0_2(self, Elab : npt.ArrayLike) -> npt.ArrayLike:
         # Obtain coefficient C0_2 as a function of Elab
         return (2 * np.pi * self.eta(Elab)) / (
                             np.exp(2 * np.pi * self.eta(Elab)) - 1)
 
-    def C1_2(self, Elab):
+    def C1_2(self, Elab : npt.ArrayLike) -> npt.ArrayLike:
         # Obtain coefficient C1_2 as a function of Elab
         return (1 / 9) * (1 + self.eta(Elab)**2) * self.C0_2(Elab)
 
-    def C2_2(self, Elab):
+    def C2_2(self, Elab : npt.ArrayLike) -> npt.ArrayLike:
         # Obtain coefficient C2_2 as a function of Elab
         return (1 / 100) * (4 + self.eta(Elab)**2) * self.C1_2(Elab)
     
-    def C3_2(self, Elab):
+    def C3_2(self, Elab : npt.ArrayLike) -> npt.ArrayLike:
         # Obtain coefficient C3_2 as a function of Elab
         return (1 / 441) * (9 + self.eta(Elab)**2) * self.C2_2(Elab)
     
-    def H_prime_eta(self, eta):
+    def H_prime_eta(self, eta : npt.ArrayLike) -> npt.ArrayLike:
         # Obtain the derivative of H with respect to eta
         return derivative(self.H_of_eta, eta, dx = 1e-10)
 
-    def H_of_eta(self, x):
+    def H_of_eta(self, x : npt.ArrayLike) -> npt.ArrayLike:
         # This is the functional form of H(eta)
         return (psi(1.j * x) + 1 / (2 * 1.j * x) - np.log(1.j * x))
     ##############################################################################
     #                                  End Utility Functions
     ##############################################################################
 
-    def rutherford(self):
+    def rutherford(self) -> npt.ArrayLike:
         """
         Returns the Rutherford cross section at the lab energies and the angles of the data.
         """
@@ -248,7 +249,7 @@ class SimBaseModel:
 
 
 
-    def cs_LO(self):
+    def cs_LO(self) -> npt.ArrayLike:
         """
         Computes the cross section up to leading order relative to Rutherford at data.
         """
@@ -288,7 +289,7 @@ class SimBaseModel:
 
 
 
-    def cov_theory(self, c_bar_squared, Lambda_B):
+    def cov_theory(self, c_bar_squared : float, Lambda_B : float) -> npt.ArrayLike:
         """
         Computes the covariance theory matrix.
         """
@@ -310,7 +311,7 @@ class SimBaseModel:
     ##############################################################################
     ##############################################################################
 
-    def set_cov_matrix(self, c_bar_squared, Lambda_B):
+    def set_cov_matrix(self, c_bar_squared : float, Lambda_B : float):
         theory_piece = self.cov_theory(c_bar_squared, Lambda_B)
         
         if self.use_theory_cov:
@@ -336,7 +337,7 @@ class SimBaseModel:
 
 
 
-    def cs_theory(self, params, order):
+    def cs_theory(self, params : npt.ArrayLike, order : int) -> npt.ArrayLike:
         """
         This is a place holder for the parameterization-dependant cs theory.
         """
@@ -344,7 +345,7 @@ class SimBaseModel:
 
 
 
-    def chi_squared(self, theory, norm):
+    def chi_squared(self, theory : npt.ArrayLike, norm : npt.ArrayLike) -> Tuple[float, npt.ArrayLike]:
         """
         Returns the chi squared and the residual when given theory, data, and norm.
         """
@@ -357,7 +358,7 @@ class SimBaseModel:
 
 
 
-    def lp_flat(self, params, bounds = None):
+    def lp_flat(self, params : npt.ArrayLike, bounds : npt.ArrayLike = None) -> float:
         """
         Defines the flat uniform prior probability distribution for parameters.
         """
@@ -372,7 +373,7 @@ class SimBaseModel:
 
 
 
-    def gaussian(self, x, center, width):
+    def gaussian(self, x : npt.ArrayLike, center : float, width : float) -> npt.ArrayLike:
         """
         Defines the form and normalization of a Gaussian.
         """
@@ -382,7 +383,7 @@ class SimBaseModel:
 
 
 
-    def lp_gauss(self, params, mu, sigma, bounds = None):
+    def lp_gauss(self, params : npt.ArrayLike, mu : float, sigma : float, bounds : npt.ArrayLike = None) -> float:
         """
         Defines the Gaussian prior probability distribution.
         """
@@ -402,7 +403,10 @@ class SimBaseModel:
     ##############################################################################
     ##############################################################################
 
-    def get_c_squared_sum(self, Lambda_B):
+    def get_c_squared_sum(self, Lambda_B : float) -> float:
+        """
+        Computes the sum of the expansion coefficients squared.
+        """
         # c2s = (self.y2s - self.y1s) / (self.cs_LO_values * np.square(self.Q_numerator / Lambda_B))
         # c1s = (self.y1s - self.cs_LO_values) / (self.cs_LO_values * (self.Q_numerator / Lambda_B))
         c1s = (self.y1s - self.cs_LO_values) / (self.c_denom_1 / Lambda_B)
@@ -410,7 +414,7 @@ class SimBaseModel:
         c2s = (self.y2s - self.y1s) / (self.c_denom_2 / Lambda_B**2)
         return np.sum(np.square(c2s) + np.square(c1s))
 
-    def get_Tau(self, Lambda_B):
+    def get_Tau(self, Lambda_B : float) -> float:
         return np.sqrt((self.nu_0 * self.Tau_0**2 + self.get_c_squared_sum(Lambda_B)) / self.nu)
     
     def set_lambda_b_norm_scale(self):
@@ -420,7 +424,7 @@ class SimBaseModel:
             vals.append(np.log(self.prior_Lambda_B(Lambda_B)) - self.nu * np.log(self.get_Tau(Lambda_B)) - 3 * np.sum(np.log(self.Q_numerator / Lambda_B)))
         self.lambda_b_norm_scale = np.max(np.array(vals))
     
-    def prior_Lambda_B(self, Lambda_B):
+    def prior_Lambda_B(self, Lambda_B : float) -> float:
         """
         Prior for Lambda_B
         Truncated Gaussian with lower bound being defined by the maximum value in the numerator of Q, upper bound is 4.0.
@@ -434,18 +438,18 @@ class SimBaseModel:
         else:
             return 0
 
-    def exp_log_unnorm_Lambda_B(self, Lambda_B):
+    def exp_log_unnorm_Lambda_B(self, Lambda_B : float) -> float:
         val = (np.log(self.prior_Lambda_B(Lambda_B)) - self.nu * np.log(self.get_Tau(Lambda_B)) - 3 * np.sum(np.log(self.Q_numerator / Lambda_B))) - self.lambda_b_norm_scale
         return np.exp(val)
 
-    def log_prior_Lambda_B(self, Lambda_B):
+    def log_prior_Lambda_B(self, Lambda_B : float) -> float:
         A = quad(self.exp_log_unnorm_Lambda_B, np.max(self.Q_numerator) + 0.00001, 3.999)[0]
         if A == 0.0 or self.prior_Lambda_B(Lambda_B) == 0.0:
             return -np.inf
         else:
             return np.log(self.exp_log_unnorm_Lambda_B(Lambda_B)) - np.log(A)
         
-    def log_prior_c_bar_squared(self, c_bar_squared):
+    def log_prior_c_bar_squared(self, c_bar_squared : float) -> float:
         # # This function has the whole inverse chi^2 distribution, the gamma piece is numerically problematic so it is removed
         return ((self.nu / 2) * np.log(self.nu * np.square(self.Tau) / 2) -
                 (1 + self.nu / 2) * np.log(c_bar_squared) - (self.nu * np.square(self.Tau) / (2 * c_bar_squared)))
@@ -458,7 +462,7 @@ class SimBaseModel:
     ##############################################################################
     ##############################################################################
 
-    def log_prior(self, parameters):
+    def log_prior(self, parameters : npt.ArrayLike) -> float:
         """
         Computes the log-prior of a given set of parameters.
         """
@@ -480,7 +484,7 @@ class SimBaseModel:
 
 
 
-    def log_likelihood(self, parameters):
+    def log_likelihood(self, parameters : npt.ArrayLike) -> float:
         """
         Determines the log-likelihood of a set of parameters.
         """
@@ -507,7 +511,7 @@ class SimBaseModel:
             return -np.inf
         
 
-    def log_posterior(self, parameters):
+    def log_posterior(self, parameters : npt.ArrayLike) -> float:
         """
         Drives the simultaneous sampling for c_bar^2, Lambda_B, ERPs, and f's.
         """
@@ -520,25 +524,9 @@ class SimBaseModel:
         params = parameters[2:int(2 + self.erp_dim)]
         params_f = parameters[int(2 + self.erp_dim):]
 
-        # print('\n\nc_bar^2: {}\nlambda_B: {}\nparams: {}\nparams_f: {}\n\n'.format(c_bar_squared, Lambda_B, params, params_f))
-
         # Perform model evaluations to get y1s, y2s
         self.y1s = self.cs_theory(params, order = 1)
         self.y2s = self.cs_theory(params, order = 2)
-        ###############################################################
-        ###############################################################
-        # # # Attempt number 2....
-        ###############################################################
-        ###############################################################
-
-        ###############################################################
-        ###############################################################
-        # # Compute c1s, c2s
-        # c1s = (self.y1s - self.cs_LO_values) / (self.cs_LO_values * (self.Q_numerator / Lambda_B))
-        # c2s = (self.y2s - self.y1s) / (self.cs_LO_values * np.square((self.Q_numerator / Lambda_B)))
-
-        # # Update the hyper parameter Tau
-        # self.Tau = np.sqrt((self.nu_0 * self.Tau_0**2 + np.sum(np.square(c1s) + np.square(c2s))) / self.nu)
 
         # Check for negative c_bar^2 and Lambda_B
         if (c_bar_squared <= 0) or (Lambda_B <= 0):
@@ -553,28 +541,13 @@ class SimBaseModel:
         # Get the log "prior" P(Lambda_B | theta, I)
         self.set_lambda_b_norm_scale()
         lambda_b_log_prior = self.log_prior_Lambda_B(Lambda_B)
-        ###############################################################
-        ###############################################################
-        ###############################################################
-        ###############################################################
-        ###############################################################
-        # # # TAU IS A FUNCTION OF LAMBDA_B!!!!!!!!!!!!!!
-        # # # Everywhere inside this normalization routine, you must
-        # # # include Lambda_B dependency!!!!
-        ###############################################################
-        ###############################################################
-        ###############################################################
-        ###############################################################
-        ###############################################################
-
+    
         # return lambda_b_log_prior
         # Compute the log "prior" P(c_bar^2 | Lambda_B, theta, I)
         c_bar_squared_log_prior = self.log_prior_c_bar_squared(c_bar_squared)
 
         # Compute the log likelihood P(D | theta, c_bar^2, Lambda_B, I)
         LL = self.log_likelihood(np.concatenate([params, params_f]))
-
-        # print('LL: {}\nc_bar^2: {}\nlambda_B: {}\nparams: {}\n\n'.format(LL, c_bar_squared_log_prior, lambda_b_log_prior, params_log_prior))
 
         # Combine the pieces for total log posterior
         log_post_pieces = np.array([LL, c_bar_squared_log_prior, lambda_b_log_prior, params_log_prior])
@@ -585,8 +558,6 @@ class SimBaseModel:
         return np.sum(log_post_pieces)
 
 
-
-
 def main():
     E_min = 0.676 # MeV
     E_max = 2.624 # MeV
@@ -595,7 +566,6 @@ def main():
     loader = DataLoader(E_min, E_max, which_data)
     data = loader.get_data()
     norm_grouping = loader.get_normalization_grouping()
-
 
     # Set up the priors
     param_bounds = np.array([[-0.02, 0.06], [-3, 3], [5.0, 25.0], [-6, 6], [5.0, 25.0], [-6, 6]])
