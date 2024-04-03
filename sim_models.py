@@ -10,14 +10,12 @@ from scipy.special import psi, gamma
 import sys; sys.path.append('./')
 from sim_base_model import SimBaseModel
 from data_loader import DataLoader
-from functools import wraps
-import time
-import cProfile, pstats
+from numpy import typing as npt
 
 
 
 class Sim_BS_C(SimBaseModel):
-    def __init__(self, data, norm_grouping, param_prior, norm_prior, use_theory_cov):
+    def __init__(self, data : npt.ArrayLike, norm_grouping : npt.ArrayLike, param_prior : npt.ArrayLike, norm_prior : npt.ArrayLike, use_theory_cov : bool):
         super().__init__(data, norm_grouping, param_prior, norm_prior, use_theory_cov)
 
         # Set the Rutherford amplitude
@@ -63,7 +61,7 @@ class Sim_BS_C(SimBaseModel):
         # self.Q_rest = np.sum(np.log(1.0 / np.sqrt(2.0 * np.pi * np.diag(cov_matrix))))
 
 
-    def cs_theory(self, params, order):
+    def cs_theory(self, params : npt.ArrayLike, order : int) -> npt.ArrayLike:
         """
         This method utilizes the existence of a bound state and also the asymptotic normalization coefficients
         to compute the theoretical cross section at the energies and angles where we have data.
