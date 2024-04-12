@@ -27,29 +27,23 @@ def main():
     # # Select the data subsets to use
     # # E_min : [0.676, 0.84 , 1.269, 1.741, 2.12 , 2.609, 2.609, 3.586, 4.332, 5.475]
     # # E_max : [0.706, 0.868, 1.292, 1.759, 2.137, 2.624, 2.624, 3.598, 4.342, 5.484]
-    E_mins  = np.array([0.676, 0.676, 0.676, 0.676, 0.676, 0.676, 0.676, 0.676]) # MeV
-    E_maxes = np.array([0.706, 0.706, 0.868, 0.868, 1.292, 1.292, 2.137, 2.137]) # MeV
-    which_datas = ['som', 'som', 'som', 'som', 'som', 'som', 'som', 'som']
+    E_mins  = np.array([0.676, 0.676]) # MeV
+    E_maxes = np.array([4.342, 4.342]) # MeV
+    which_datas = ['som', 'som']
 
     # Select the parameterizations
-    parameterizations = ['bs_C', 'bs_C', 'bs_C', 'bs_C', 'bs_C', 'bs_C', 'bs_C', 'bs_C']
+    parameterizations = ['bs_C', 'bs_C']
 
     # Parameters for the MCMC sampling
-    n_steps = [300000, 300000, 300000, 300000, 300000, 300000, 300000, 300000]
-    n_burns = [50000, 50000, 50000, 50000, 50000, 50000, 50000, 50000]
+    n_steps = [300000, 300000]
+    n_burns = [50000, 50000]
 
     # Use theory cov?
-    use_theory_covs = [False, True, False, True, False, True, False, True]
+    use_theory_covs = [False, True]
 
     # Always write a comment for the run (at least just '\n'!!)
-    comments = ['Run to check for weird missing stripe structure; default StretchMove',
-                'Run to check for weird missing stripe structure; default StretchMove',
-                'Run to check for weird missing stripe structure; default StretchMove',
-                'Run to check for weird missing stripe structure; default StretchMove',
-                'Run to check for weird missing stripe structure; default StretchMove',
-                'Run to check for weird missing stripe structure; default StretchMove',
-                'Run to check for weird missing stripe structure; default StretchMove',
-                'Run to check for weird missing stripe structure; default StretchMove']
+    comments = ['Production run for VI paper: emcee - without theory cov, Default StretchMove\n',
+                'Production run for VI paper: emcee - with theory cov, Default StretchMove\n']
 
     # # # Optional:
     # Set a specific prior? (Default set to None)
@@ -57,8 +51,8 @@ def main():
     #                  np.array([[-0.02, 0.06], [-3, 3], [5.0, 25.0], [1.4, 1.8], [5.0, 25.0], [-6, 6]]),
     #                  np.array([[-0.02, 0.06], [-3, 3], [5.0, 25.0], [1.0, 2.5], [5.0, 25.0], [1.5, 2.5]]),
     #                  np.array([[-0.02, 0.06], [-3, 3], [5.0, 25.0], [1.0, 2.5], [5.0, 25.0], [0.0, 1.7]])]
-    params_bounds = [None, None, None, None, None, None, None, None]
-    params_priors = [None, None, None, None, None, None, None, None]
+    params_bounds = [None, None]
+    params_priors = [None, None]
 
     # params_bounds = [np.array([[-0.02, 0.06], [-3, 3], [5.0, 25.0], [1.70, 3], [5.0, 25.0], [-6, 6]])]
     # params_priors = [np.array([[0.025, 0.015], [0.8, 0.4], [13.84, 1.63], [2.0, 1.6], [12.59, 1.85], [0.0, 1.6]])]
