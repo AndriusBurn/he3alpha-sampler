@@ -311,6 +311,23 @@ class SimBaseModel:
     ##############################################################################
     ##############################################################################
 
+    # def set_cov_matrix(self, c_bar_squared : float, Lambda_B : float):
+    #     theory_piece = self.cov_theory(c_bar_squared, Lambda_B)
+        
+    #     if self.use_theory_cov:
+    #         self.cov_matrix = theory_piece + self.exp_piece
+    #     else:
+    #         self.cov_matrix = self.exp_piece
+    #     # self.inverse_cov_matrix = np.linalg.inv(self.cov_matrix)
+    #     eigenvals = np.linalg.eigvalsh(self.cov_matrix)
+
+    #     if np.any(eigenvals == 0):
+    #         self.Q_rest = -np.inf
+    #     else:
+    #         log_det = np.sum(np.log(eigenvals))
+    #         self.Q_rest = -0.5 * (np.log(2 * np.pi) + log_det)
+    #     # return True
+            
     def set_cov_matrix(self, c_bar_squared : float, Lambda_B : float):
         theory_piece = self.cov_theory(c_bar_squared, Lambda_B)
         
@@ -319,13 +336,13 @@ class SimBaseModel:
         else:
             self.cov_matrix = self.exp_piece
         # self.inverse_cov_matrix = np.linalg.inv(self.cov_matrix)
-        eigenvals = np.linalg.eigvalsh(self.cov_matrix)
+        # eigenvals = np.linalg.eigvalsh(self.cov_matrix)
+        slog_det = np.linalg.slogdet(self.cov_matrix)
 
-        if np.any(eigenvals == 0):
+        if slog_det[0] == 0:
             self.Q_rest = -np.inf
         else:
-            log_det = np.sum(np.log(eigenvals))
-            self.Q_rest = -0.5 * (np.log(2 * np.pi) + log_det)
+            self.Q_rest = -0.5 * (np.log(2 * np.pi) + slog_det[1])
         # return True
         
 
