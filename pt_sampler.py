@@ -25,7 +25,7 @@ def main():
     # # E_min : [0.676, 0.84 , 1.269, 1.741, 2.12 , 2.609, 2.609, 3.586, 4.332, 5.475]
     # # E_max : [0.706, 0.868, 1.292, 1.759, 2.137, 2.624, 2.624, 3.598, 4.342, 5.484]
     E_mins = np.array([0.676, 0.676]) # MeV
-    E_maxes = np.array([3.598, 3.598]) # MeV
+    E_maxes = np.array([2.624, 2.624]) # MeV
     which_datas = ['som', 'som']
 
     # Select the parameterizations
@@ -43,8 +43,8 @@ def main():
     use_theory_covs = [False, True]
 
     # Always write a comment for the run (at least just '\n'!!)
-    comments = ['Run to test for bimodality with all data: ptemcee - no theory cov',
-                'Run to test for bimodality with all data: ptemcee - yes theory cov']
+    comments = ['Production run for VI paper: ptemcee - no theory cov',
+                'Production run for VI paper: ptemcee - yes theory cov']
 
     # # # Optional:
     # Set a specific prior? (Default set to None)
