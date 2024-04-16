@@ -550,7 +550,7 @@ class SimBaseModel:
         self.y2s = self.cs_theory(params, order = 2)
 
         # Check for negative c_bar^2 and Lambda_B
-        if (c_bar_squared <= 0) or (Lambda_B <= 0):
+        if (c_bar_squared <= 0.001) or (Lambda_B <= 0.001):
             return -np.inf
         
         # Set the new covariance matrix (self.cov_matrix, self.inverse_cov_matrix, and self.Q_rest)
