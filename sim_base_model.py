@@ -597,7 +597,7 @@ def main():
     test = np.concatenate([[1.0], [0.8], gauss_prior_params[:, 2], gauss_prior_f[:, 2]])
 
     with cProfile.Profile() as profile:
-        for i in range(0, 300):
+        for i in range(0, 1000):
             model.log_posterior(test)
 
     results = pstats.Stats(profile)
