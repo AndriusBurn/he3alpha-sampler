@@ -32,8 +32,8 @@ def main():
     parameterizations = ['sim_bs_C']
 
     # Parameters for the MCMC sampling
-    n_steps = [50]
-    n_burns = [10]
+    n_steps = [50000]
+    n_burns = [10000]
 
     # Parameters to set the number of different temperatures
     n_temps_lows = [5]
