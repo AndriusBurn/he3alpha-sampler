@@ -564,11 +564,18 @@ class SimBaseModel:
         lambda_b_log_prior = self.log_prior_Lambda_B(Lambda_B)
     
         # return lambda_b_log_prior
+
+        # Update tau
+        self.Tau = self.get_Tau(Lambda_B)
+
         # Compute the log "prior" P(c_bar^2 | Lambda_B, theta, I)
         c_bar_squared_log_prior = self.log_prior_c_bar_squared(c_bar_squared)
 
         # Compute the log likelihood P(D | theta, c_bar^2, Lambda_B, I)
         LL = self.log_likelihood(np.concatenate([params, params_f]))
+
+        print('Prior pieces: ', params_log_prior, lambda_b_log_prior, c_bar_squared_log_prior)
+        print(LL)
 
         # Combine the pieces for total log posterior
         log_post_pieces = np.array([LL, c_bar_squared_log_prior, lambda_b_log_prior, params_log_prior])
@@ -600,13 +607,15 @@ def main():
     model = sim_models.Sim_BS_C(data, norm_grouping, gauss_prior_params, gauss_prior_f, True)
     test = np.concatenate([[1.0], [0.8], gauss_prior_params[:, 2], gauss_prior_f[:, 2]])
 
-    with cProfile.Profile() as profile:
-        for i in range(0, 1000):
-            model.log_posterior(test)
+    print(model.log_posterior(test))
 
-    results = pstats.Stats(profile)
-    results.sort_stats(pstats.SortKey.TIME)
-    results.print_stats()
+    # with cProfile.Profile() as profile:
+    #     for i in range(0, 1000):
+    #         model.log_posterior(test)
+
+    # results = pstats.Stats(profile)
+    # results.sort_stats(pstats.SortKey.TIME)
+    # results.print_stats()
 
 if __name__ == "__main__":
     main()

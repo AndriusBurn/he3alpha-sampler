@@ -8,7 +8,8 @@ Created on Wed Mar  6 21:18:01 EST 2024
 import numpy as np
 from scipy.special import psi, gamma
 import sys; sys.path.append('./')
-from sim_base_model import SimBaseModel
+# from sim_base_model import SimBaseModel
+from sim_pt_separate_base_model import SimBaseModel
 from data_loader import DataLoader
 from numpy import typing as npt
 

@@ -24,32 +24,31 @@ def main():
     # # Select the data subsets to use
     # # E_min : [0.676, 0.84 , 1.269, 1.741, 2.12 , 2.609, 2.609, 3.586, 4.332, 5.475]
     # # E_max : [0.706, 0.868, 1.292, 1.759, 2.137, 2.624, 2.624, 3.598, 4.342, 5.484]
-    E_mins = np.array([0.676, 0.676]) # MeV
-    E_maxes = np.array([3.598, 3.598]) # MeV
-    which_datas = ['som', 'som']
+    E_mins = np.array([0.676]) # MeV
+    E_maxes = np.array([2.624]) # MeV
+    which_datas = ['som']
 
     # Select the parameterizations
-    parameterizations = ['bs_C', 'bs_C']
+    parameterizations = ['sim_bs_C']
 
     # Parameters for the MCMC sampling
-    n_steps = [50000, 50000]
-    n_burns = [10000, 10000]
+    n_steps = [50]
+    n_burns = [10]
 
     # Parameters to set the number of different temperatures
-    n_temps_lows = [5, 5]
-    n_temps_highs = [5, 5]
+    n_temps_lows = [5]
+    n_temps_highs = [5]
 
     # Use theory cov?
-    use_theory_covs = [False, True]
+    use_theory_covs = [True]
 
     # Always write a comment for the run (at least just '\n'!!)
-    comments = ['Run to test for bimodality with all data: ptemcee - no theory cov',
-                'Run to test for bimodality with all data: ptemcee - yes theory cov']
+    comments = ['Run to test with sim: ptemcee - yes theory cov\n']
 
     # # # Optional:
     # Set a specific prior? (Default set to None)
-    params_bounds = [None, None]
-    params_priors = [None, None]
+    params_bounds = [None]
+    params_priors = [None]
 
     # params_bounds = [np.array([[-0.02, 0.06], [-3, 3], [5.0, 25.0], [1.70, 3], [5.0, 25.0], [-6, 6]])]
     # params_priors = [np.array([[0.025, 0.015], [0.8, 0.4], [13.84, 1.63], [2.0, 1.6], [12.59, 1.85], [0.0, 1.6]])]
@@ -157,19 +156,24 @@ def main():
         starting_samples = np.zeros((n_temps, n_walkers, model.total_dim))
         for k in range(0, n_temps):
             for j in range(0, n_walkers):
-                for l in range(0, model.total_dim):
-                    min_bound, max_bound, mu, sigma = model.prior_info[l]
+                for l in range(2, model.total_dim):
+                    min_bound, max_bound, mu, sigma = model.prior_info[l - 2]
                     lower = (min_bound - mu) / sigma
                     upper = (max_bound - mu) / sigma
                     starting_samples[k, j, l] = truncnorm.rvs(lower, upper, loc = mu, scale = sigma)
 
-        # # Count the number of cores
-        # cpu_count = mp.cpu_count()
-        # cpu_save = 1
-        # cpu_use = int(cpu_count - cpu_save)
-        # if cpu_use <= 0:
-        #     sys.stderr('Use less cores!')
-        #     sys.exit(-1)
+        for k in range(0, n_temps):
+            for j in range(0, n_walkers):
+                generating_starting_pos = True
+                while generating_starting_pos:
+                    tmp1 = np.random.chisquare(model.nu_0)
+                    tmp2 = np.random.normal(1, 0.7)
+
+                    if tmp1 > 0.001 and tmp2 > 0.001:
+                        starting_samples[k, j, 0] = tmp1
+                        starting_samples[k, j, 1] = tmp2
+                        generating_starting_pos = False
+
           
         # Useful output statements
         sys.stdout.write('Starting run with {} data {} - {} MeV\n'.format(which_data, E_min, E_max))
