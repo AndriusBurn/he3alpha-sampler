@@ -325,11 +325,12 @@ class SimBaseModel:
         r = norm * theory - self.cs_data
         try:
             chi_2 = np.dot(r.T, np.linalg.solve(self.cov_matrix, r))
+            return chi_2, r
         except np.linalg.LinAlgError as e:
             print('Singular covariance matrix:')
             print(self.cov_matrix)
-        return chi_2, r
-
+            return np.inf
+        
 
 
     def lp_flat(self, params : npt.ArrayLike, bounds : npt.ArrayLike = None) -> float:
