@@ -531,7 +531,7 @@ class SimBaseModel:
         params_f = parameters[int(2 + self.erp_dim):]
 
         # c_bar^2 and Lambda_B must be positive nonzero (small values threaten a singular covariance matrix)
-        if (c_bar_squared <= 0.001) or (Lambda_B <= 0.001):
+        if (c_bar_squared <= 0.001) or (Lambda_B <= max(self.Q_numerator)):
             return -np.inf
         
         # Construct the covariance matrix
