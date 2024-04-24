@@ -169,7 +169,7 @@ def main():
                     tmp1 = np.random.chisquare(model.nu_0)
                     tmp2 = np.random.normal(1, 0.7)
 
-                    if tmp1 > 0.001 and tmp2 > 0.001:
+                    if tmp1 > 0.001 and tmp2 > np.max(model.Q_numerator):
                         starting_samples[k, j, 0] = tmp1
                         starting_samples[k, j, 1] = tmp2
                         generating_starting_pos = False
