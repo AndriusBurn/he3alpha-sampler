@@ -12,8 +12,18 @@ import sim_models, os, tqdm, time
 import emcee, ptemcee
 from scipy.stats import truncnorm
 import multiprocessing as mp
+from scipy.special import gamma
 
 warnings.simplefilter('ignore')
+
+def get_c_bar_squared_start_pos(nu_0, tau_0, min_bound, max_bound):
+    finished = False
+    while not finished:
+        x = np.random.uniform(min_bound, max_bound)
+        prob = (nu_0 * tau_0**2 / 2)**(nu_0 / 2) * np.exp(-nu_0 * tau_0**2 / (2 * x)) / (gamma(nu_0 / 2) * (np.power(x, 1 + nu_0/2)))
+        if np.random.uniform(min_bound, max_bound) < prob:
+            finished = True
+            return x
 
 def main():
     ##############################################################################
@@ -32,8 +42,8 @@ def main():
     parameterizations = ['sim_bs_C']
 
     # Parameters for the MCMC sampling
-    n_steps = [5000]
-    n_burns = [1000]
+    n_steps = [50000]
+    n_burns = [10000]
 
     # Parameters to set the number of different temperatures
     n_temps_lows = [4]
@@ -141,7 +151,8 @@ def main():
         n_walkers = int(2 * model.total_dim)
         temps_low = np.array([2**(i / 8) for i in range(0, n_temps_low)])
         temps_high = np.array([np.sqrt(2)**i for i in range(0, n_temps_high)])
-        temps = np.concatenate((temps_low, temps_high[temps_high > max(temps_low)]))
+        # temps = np.concatenate((temps_low, temps_high[temps_high > max(temps_low)]))
+        temps = np.linspace(1, 100, int(n_temps_low + n_temps_high))
         n_temps = temps.shape[0]
         betas = 1 / temps
 
@@ -166,7 +177,7 @@ def main():
             for j in range(0, n_walkers):
                 generating_starting_pos = True
                 while generating_starting_pos:
-                    tmp1 = np.random.chisquare(model.nu_0)
+                    tmp1 = get_c_bar_squared_start_pos(model.nu_0, model.Tau_0, 0.001, 10)
                     tmp2 = np.random.normal(1, 0.7)
 
                     if tmp1 > 0.001 and tmp2 > np.max(model.Q_numerator):
