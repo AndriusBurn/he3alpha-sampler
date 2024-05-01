@@ -53,7 +53,7 @@ def main():
     use_theory_covs = [True]
 
     # Always write a comment for the run (at least just '\n'!!)
-    comments = ['Run to test with sim: ptemcee - yes theory cov\n']
+    comments = ['Modified beta ladder and starting position for c_bar^2: ptemcee - yes theory cov\n']
 
     # # # Optional:
     # Set a specific prior? (Default set to None)
