@@ -27,23 +27,22 @@ def main():
     # # Select the data subsets to use
     # # E_min : [0.676, 0.84 , 1.269, 1.741, 2.12 , 2.609, 2.609, 3.586, 4.332, 5.475]
     # # E_max : [0.706, 0.868, 1.292, 1.759, 2.137, 2.624, 2.624, 3.598, 4.342, 5.484]
-    E_mins  = np.array([0.676, 0.676]) # MeV
-    E_maxes = np.array([4.342, 4.342]) # MeV
-    which_datas = ['som', 'som']
+    E_mins  = np.array([0.676]) # MeV
+    E_maxes = np.array([4.342]) # MeV
+    which_datas = ['som']
 
     # Select the parameterizations
-    parameterizations = ['bs_C', 'bs_C']
+    parameterizations = ['initial_f_wave']
 
     # Parameters for the MCMC sampling
-    n_steps = [300000, 300000]
-    n_burns = [50000, 50000]
+    n_steps = [300000]
+    n_burns = [50000]
 
     # Use theory cov?
-    use_theory_covs = [False, True]
+    use_theory_covs = [False]
 
     # Always write a comment for the run (at least just '\n'!!)
-    comments = ['Production run for VI paper: emcee - without theory cov, Default StretchMove\n',
-                'Production run for VI paper: emcee - with theory cov, Default StretchMove\n']
+    comments = ['Testing run for f-wave resonance: emcee - without theory covariance, default StretchMove\n']
 
     # # # Optional:
     # Set a specific prior? (Default set to None)
