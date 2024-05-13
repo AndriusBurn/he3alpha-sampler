@@ -35,8 +35,8 @@ def main():
     parameterizations = ['initial_f_wave']
 
     # Parameters for the MCMC sampling
-    n_steps = [300000]
-    n_burns = [50000]
+    n_steps = [30000]
+    n_burns = [5000]
 
     # Use theory cov?
     use_theory_covs = [False]
