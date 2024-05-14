@@ -485,32 +485,50 @@ class SimBaseModel:
         ##############################################################################
         params_log_prior = self.log_prior_params(np.concatenate([params, params_f]))
 
-        ##############################################################################
-        # # # # # P(Lambda_B | theta, I)
-        ##############################################################################
-        # Model evaluations for y1s and y2s
-        y1s = self.cs_theory(params, order = 1)
-        y2s = self.cs_theory(params, order = 2)
 
-        # Define the c_tildes (c_ns without the Lambda_B dependency)
-        c1_tildes = (y1s - self.cs_LO_values) / (self.c_denom_1)
-        c2_tildes = (y2s - y1s) / self.c_denom_2
-
-        # Set the scale for the Lambda_B prior
-        vals = []
-        Lambda_Bs = np.linspace(np.max(self.Q_numerator) + 0.00001, 4, 100)
-        for Lambda_B in Lambda_Bs:
-            vals.append(np.log(self.prior_Lambda_B(Lambda_B)) - 
-                        self.nu * np.log(self.get_Tau(Lambda_B, c1_tildes, c2_tildes)) - 
-                        3 * np.sum(np.log(self.Q_numerator / Lambda_B)))
-        self.lambda_b_norm_scale = np.max(np.array(vals))
-
-        lambda_b_log_prior = self.log_prior_Lambda_B(Lambda_B, c1_tildes, c2_tildes)
+        ############################################################################## START
         ##############################################################################
-        # # # # # P(c_bar^2 | Lambda_B, theta, I)
         ##############################################################################
-        Tau = self.get_Tau(Lambda_B, c1_tildes, c2_tildes)
-        c_bar_squared_log_prior = self.log_prior_c_bar_squared(c_bar_squared, Tau)
+        ##############################################################################
+        # In this iteration we decouple the theta dependence in Lambda_B and the c_bar^2
+        # by forcing the prior to be a tight Gaussian around Lambda_B = 200 MeV and c_bar = 0.7
+        # # # # # P(Lambda_B | theta, I) = P(Lambda_B | I)
+        lambda_b_log_prior = self.lp_gauss(Lambda_B, 1.01354, 0.01, [0.001, 3])
+
+        # # # # # P(c_bar^2 | Lambda_B, theta, I) = P(c_bar^2 | I)
+        c_bar_squared_log_prior = self.lp_gauss(c_bar_squared, 0.49, 0.005, [0.001, 5])
+
+        ############################################################################## 
+        ##############################################################################
+        ##############################################################################
+        ############################################################################## END
+
+        # ##############################################################################
+        # # # # # # P(Lambda_B | theta, I)
+        # ##############################################################################
+        # # Model evaluations for y1s and y2s
+        # y1s = self.cs_theory(params, order = 1)
+        # y2s = self.cs_theory(params, order = 2)
+
+        # # Define the c_tildes (c_ns without the Lambda_B dependency)
+        # c1_tildes = (y1s - self.cs_LO_values) / (self.c_denom_1)
+        # c2_tildes = (y2s - y1s) / self.c_denom_2
+
+        # # Set the scale for the Lambda_B prior
+        # vals = []
+        # Lambda_Bs = np.linspace(np.max(self.Q_numerator) + 0.00001, 4, 100)
+        # for Lambda_B in Lambda_Bs:
+        #     vals.append(np.log(self.prior_Lambda_B(Lambda_B)) - 
+        #                 self.nu * np.log(self.get_Tau(Lambda_B, c1_tildes, c2_tildes)) - 
+        #                 3 * np.sum(np.log(self.Q_numerator / Lambda_B)))
+        # self.lambda_b_norm_scale = np.max(np.array(vals))
+
+        # lambda_b_log_prior = self.log_prior_Lambda_B(Lambda_B, c1_tildes, c2_tildes)
+        # ##############################################################################
+        # # # # # # P(c_bar^2 | Lambda_B, theta, I)
+        # ##############################################################################
+        # Tau = self.get_Tau(Lambda_B, c1_tildes, c2_tildes)
+        # c_bar_squared_log_prior = self.log_prior_c_bar_squared(c_bar_squared, Tau)
 
         # Combine the sum of log pieces
         return params_log_prior + lambda_b_log_prior + c_bar_squared_log_prior
