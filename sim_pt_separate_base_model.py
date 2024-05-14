@@ -284,7 +284,9 @@ class SimBaseModel:
 
         # Generate the theory covariance matrix 
         cov_theory_cs = (c_bar_squared * y0 * (Q**(self.n_c + 1))).transpose() @ (
-            c_bar_squared * y0 * (Q**(self.n_c + 1))) / (1 - Q.transpose() @ Q) # # Make more explicit with np.outer
+            y0 * (Q**(self.n_c + 1))) #/ (1 - Q.transpose() @ Q) # # Make more explicit with np.outer
+        # cov_theory_cs = (c_bar_squared * y0 * (Q**(self.n_c + 1))).transpose() @ (
+        #     c_bar_squared * y0 * (Q**(self.n_c + 1))) / (1 - Q.transpose() @ Q) # # Make more explicit with np.outer
         return cov_theory_cs.astype(np.double)
     
     
