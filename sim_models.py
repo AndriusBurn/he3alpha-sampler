@@ -133,6 +133,9 @@ class Sim_BS_C(SimBaseModel):
         sigma_R = 10 * np.abs(self.f_r)**2
         sigma_ratio = sigma / sigma_R
         return sigma_ratio
+    
+    def get_cs_theory(params : npt.ArrayLike, theta_deg : npt.ArrayLike, E_lab : npt.ArrayLike) -> npt.ArrayLike:
+        pass
 
 
 
