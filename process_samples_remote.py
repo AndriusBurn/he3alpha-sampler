@@ -56,7 +56,7 @@ def process(directory):
         params_prior = np.array([[0.025, 0.015], [0.8, 0.4], [13.84, 1.63], [0.0, 1.6], [12.59, 1.85], [0.0, 1.6]]) # center, width
         gauss_prior_params = np.hstack([param_bounds, params_prior])
         model = models.BS_C(data, norm_group, gauss_prior_params, gauss_prior_f, use_theory_cov)
-    elif parameterization == 'init-f-wave':
+    elif parameterization == 'initial_f_wave':
         labels = ['A0', 'r0', 'C1+^2', 'P1+', 'C1-^2', 'P1-', 'r3+']
         param_bounds = np.array([[-0.02, 0.06], [-3, 3], [5.0, 25.0], [-6, 6], [5.0, 25.0], [-6, 6], [-3, 0]])
         params_prior = np.array([[0.025, 0.015], [0.8, 0.4], [13.84, 1.63], [0.0, 1.6], [12.59, 1.85], [0.0, 1.6], [-0.5, 1]]) # center, width
