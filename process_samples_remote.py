@@ -126,6 +126,10 @@ def process(directory, plot_cs = True):
     plt.suptitle("E_min = {} MeV, E_max = {} MeV, {} data".format(E_min, E_max, which_data))
     plt.savefig(directory + '/corner_plot.png')
 
+    # Generate the full corner plot
+    corner.corner(samples[:], labels = labels, quantiles = [0.16, 0.5, 0.84], title_fmt = '.4f', show_titles = True)
+    plt.suptitle("E_min = {} MeV, E_max = {} MeV, {} data".format(E_min, E_max, which_data))
+    plt.savefig(directory + '/full_corner_plot.png')
 
     # Set up root path for the data
     root_path = './'
