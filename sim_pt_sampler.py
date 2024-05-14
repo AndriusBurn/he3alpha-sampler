@@ -42,8 +42,8 @@ def main():
     parameterizations = ['sim_bs_C']
 
     # Parameters for the MCMC sampling
-    n_steps = [50000]
-    n_burns = [10000]
+    n_steps = [2000]
+    n_burns = [2000]
 
     # Parameters to set the number of different temperatures
     n_temps_lows = [4]
@@ -53,7 +53,7 @@ def main():
     use_theory_covs = [True]
 
     # Always write a comment for the run (at least just '\n'!!)
-    comments = ['Modified beta ladder and starting position for c_bar^2: ptemcee - yes theory cov\n']
+    comments = ['Tighter Gaussian prior on c_bar = 0.7 and Lambda_B = 1.0135 fm^-1\n']
 
     # # # Optional:
     # Set a specific prior? (Default set to None)
@@ -151,8 +151,8 @@ def main():
         n_walkers = int(2 * model.total_dim)
         temps_low = np.array([2**(i / 8) for i in range(0, n_temps_low)])
         temps_high = np.array([np.sqrt(2)**i for i in range(0, n_temps_high)])
-        # temps = np.concatenate((temps_low, temps_high[temps_high > max(temps_low)]))
-        temps = np.linspace(1, 100, int(n_temps_low + n_temps_high))
+        temps = np.concatenate((temps_low, temps_high[temps_high > max(temps_low)]))
+        # temps = np.linspace(1, 100, int(n_temps_low + n_temps_high))
         n_temps = temps.shape[0]
         betas = 1 / temps
 
@@ -164,6 +164,7 @@ def main():
         ##############################################################################
 
         # # # Initialize the starting samples (according to the prior)
+        # For the ERPs + norms
         starting_samples = np.zeros((n_temps, n_walkers, model.total_dim))
         for k in range(0, n_temps):
             for j in range(0, n_walkers):
@@ -173,18 +174,23 @@ def main():
                     upper = (max_bound - mu) / sigma
                     starting_samples[k, j, l] = truncnorm.rvs(lower, upper, loc = mu, scale = sigma)
 
+        # For c_bar^2 and Lambda_B
         for k in range(0, n_temps):
             for j in range(0, n_walkers):
                 generating_starting_pos = True
                 while generating_starting_pos:
-                    tmp1 = get_c_bar_squared_start_pos(model.nu_0, model.Tau_0, 0.001, 10)
-                    tmp2 = np.random.normal(1, 0.7)
+                    # tmp1 = get_c_bar_squared_start_pos(model.nu_0, model.Tau_0, 0.001, 10)
+                    # tmp2 = np.random.normal(1, 0.7)
+                    tmp1 = np.random.normal(0.49, 0.005)
+                    tmp2 = np.random.normal(1.0135, 0.01)
+
 
                     if tmp1 > 0.001 and tmp2 > np.max(model.Q_numerator):
                         starting_samples[k, j, 0] = tmp1
                         starting_samples[k, j, 1] = tmp2
                         generating_starting_pos = False
 
+        # import pdb; pdb.set_trace()
           
         # Useful output statements
         sys.stdout.write('Starting run with {} data {} - {} MeV\n'.format(which_data, E_min, E_max))
