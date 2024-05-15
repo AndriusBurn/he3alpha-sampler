@@ -53,7 +53,7 @@ def main():
     use_theory_covs = [True]
 
     # Always write a comment for the run (at least just '\n'!!)
-    comments = ['Tighter Gaussian prior on c_bar = 0.7 and Lambda_B = 1.0135 fm^-1\n']
+    comments = ['Test run: removing the denominator, centering c_bar^2 at 0.2401 (0.49^2), \n']
 
     # # # Optional:
     # Set a specific prior? (Default set to None)
@@ -181,7 +181,7 @@ def main():
                 while generating_starting_pos:
                     # tmp1 = get_c_bar_squared_start_pos(model.nu_0, model.Tau_0, 0.001, 10)
                     # tmp2 = np.random.normal(1, 0.7)
-                    tmp1 = np.random.normal(0.49, 0.005)
+                    tmp1 = np.random.normal(0.2401, 0.005)
                     tmp2 = np.random.normal(1.0135, 0.01)
 
 
