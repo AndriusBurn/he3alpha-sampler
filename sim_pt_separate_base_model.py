@@ -71,8 +71,9 @@ class SimBaseModel:
         self.Tau_0 = 1.5
         self.nu_0 = 1.5
 
-        self.Tau = 1.0 
-        self.nu = self.nu_0 + (self.cs_data.shape[0] * self.n_c)
+        self.Tau = 1.5 
+        # self.nu = self.nu_0 + (self.cs_data.shape[0] * self.n_c) # Original code
+        self.nu = 1.5 # Step 1.
 
 
         # Store the numerator of Q
@@ -282,11 +283,9 @@ class SimBaseModel:
         Q = self.Q_numerator / Lambda_B
         Q = np.reshape(Q, (1, len(Q)))
 
-        # Generate the theory covariance matrix 
+        # Generate the theory covariance matrix - - only 1 c_bar_squared should appear here
         cov_theory_cs = (c_bar_squared * y0 * (Q**(self.n_c + 1))).transpose() @ (
-            y0 * (Q**(self.n_c + 1))) #/ (1 - Q.transpose() @ Q) # # Make more explicit with np.outer
-        # cov_theory_cs = (c_bar_squared * y0 * (Q**(self.n_c + 1))).transpose() @ (
-        #     c_bar_squared * y0 * (Q**(self.n_c + 1))) / (1 - Q.transpose() @ Q) # # Make more explicit with np.outer
+            y0 * (Q**(self.n_c + 1))) / (1 - Q.transpose() @ Q) # # Make more explicit with np.outer
         return cov_theory_cs.astype(np.double)
     
     
@@ -488,24 +487,38 @@ class SimBaseModel:
         params_log_prior = self.log_prior_params(np.concatenate([params, params_f]))
 
 
-        ############################################################################## START
+        # ############################################################################## STEP 0. START
+        # ##############################################################################
+        # ##############################################################################
+        # ##############################################################################
+        # # In this iteration we decouple the theta dependence in Lambda_B and the c_bar^2
+        # # by forcing the prior to be a tight Gaussian around Lambda_B = 200 MeV and c_bar = 0.7
+        # # # # # # P(Lambda_B | theta, I) = P(Lambda_B | I)
+        # lambda_b_log_prior = self.lp_gauss(Lambda_B, 1.01354, 0.01, [0.001, 3])
+
+        # # # # # # P(c_bar^2 | Lambda_B, theta, I) = P(c_bar^2 | I)
+        # c_bar_squared_log_prior = self.lp_gauss(c_bar_squared, 0.49, 0.05, [0.001, 5])
+
+        # ############################################################################## 
+        # ##############################################################################
+        # ##############################################################################
+        # ############################################################################## STEP 0. END
+
+        ############################################################################## STEP 1. START
         ##############################################################################
         ##############################################################################
         ##############################################################################
-        # In this iteration we decouple the theta dependence in Lambda_B and the c_bar^2
-        # by forcing the prior to be a tight Gaussian around Lambda_B = 200 MeV and c_bar = 0.7
         # # # # # P(Lambda_B | theta, I) = P(Lambda_B | I)
-        lambda_b_log_prior = self.lp_gauss(Lambda_B, 1.01354, 0.01, [0.001, 3])
+        lambda_b_log_prior = np.log(self.prior_Lambda_B(Lambda_B))
 
-        # # # # # P(c_bar^2 | Lambda_B, theta, I) = P(c_bar^2 | I)
-        c_bar_squared_log_prior = self.lp_gauss(c_bar_squared, 0.49, 0.005, [0.001, 5])
-
+        # # # # # P(c_bar^2 | Lambda_B, theta, I)
+        c_bar_squared_log_prior = self.log_prior_c_bar_squared(c_bar_squared, 1.5)
         ############################################################################## 
         ##############################################################################
         ##############################################################################
-        ############################################################################## END
+        ############################################################################## STEP 1. END
 
-        # ##############################################################################
+        # ############################################################################## ORIGINAL CODE START
         # # # # # # P(Lambda_B | theta, I)
         # ##############################################################################
         # # Model evaluations for y1s and y2s
@@ -530,7 +543,7 @@ class SimBaseModel:
         # # # # # # P(c_bar^2 | Lambda_B, theta, I)
         # ##############################################################################
         # Tau = self.get_Tau(Lambda_B, c1_tildes, c2_tildes)
-        # c_bar_squared_log_prior = self.log_prior_c_bar_squared(c_bar_squared, Tau)
+        # c_bar_squared_log_prior = self.log_prior_c_bar_squared(c_bar_squared, Tau) # ORIGINAL CODE END
 
         # Combine the sum of log pieces
         return params_log_prior + lambda_b_log_prior + c_bar_squared_log_prior
