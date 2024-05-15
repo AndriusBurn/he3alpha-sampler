@@ -53,7 +53,7 @@ def main():
     use_theory_covs = [True]
 
     # Always write a comment for the run (at least just '\n'!!)
-    comments = ['Test run: removing the denominator, centering c_bar^2 at 0.2401 (0.49^2), \n']
+    comments = ['Test run: using corrected cov matrix, c_bar^2 prior using nu = tau = 1.5 - no updating, lambda prior is numerator - no updating\n']
 
     # # # Optional:
     # Set a specific prior? (Default set to None)
