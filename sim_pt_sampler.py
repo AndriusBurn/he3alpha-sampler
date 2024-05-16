@@ -42,8 +42,8 @@ def main():
     parameterizations = ['sim_bs_C']
 
     # Parameters for the MCMC sampling
-    n_steps = [2000]
-    n_burns = [2000]
+    n_steps = [10000]
+    n_burns = [5000]
 
     # Parameters to set the number of different temperatures
     n_temps_lows = [4]
@@ -53,7 +53,7 @@ def main():
     use_theory_covs = [True]
 
     # Always write a comment for the run (at least just '\n'!!)
-    comments = ['Test run: using corrected cov matrix, c_bar^2 prior using nu = tau = 1.5 - no updating, lambda prior is numerator - no updating\n']
+    comments = ['Test run: doing step 3.a, nu = nc + 2 * Ndata, nu tau2 = 1.5^3 + N(c1^2 + c2^2)\n']
 
     # # # Optional:
     # Set a specific prior? (Default set to None)
@@ -179,10 +179,10 @@ def main():
             for j in range(0, n_walkers):
                 generating_starting_pos = True
                 while generating_starting_pos:
-                    # tmp1 = get_c_bar_squared_start_pos(model.nu_0, model.Tau_0, 0.001, 10)
-                    # tmp2 = np.random.normal(1, 0.7)
-                    tmp1 = np.random.normal(0.2401, 0.005)
-                    tmp2 = np.random.normal(1.0135, 0.01)
+                    tmp1 = get_c_bar_squared_start_pos(model.nu_0, model.Tau_0, 0.001, 10)
+                    tmp2 = np.random.normal(1, 0.7)
+                    # tmp1 = np.random.normal(0.2401, 0.005)
+                    # tmp2 = np.random.normal(1.0135, 0.01)
 
 
                     if tmp1 > 0.001 and tmp2 > np.max(model.Q_numerator):
