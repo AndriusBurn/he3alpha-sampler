@@ -41,9 +41,10 @@ def main():
     # Select the parameterizations
     parameterizations = ['sim_bs_C']
 
-    # Parameters for the MCMC sampling
-    n_steps = [10000]
-    n_burns = [5000]
+    # Parameters for the MCMC sampling 
+    # Multiply by the number of walkers!!!
+    n_steps = [30000]
+    n_burns = [10000]
 
     # Parameters to set the number of different temperatures
     n_temps_lows = [4]
@@ -53,7 +54,7 @@ def main():
     use_theory_covs = [True]
 
     # Always write a comment for the run (at least just '\n'!!)
-    comments = ['Test run: doing step 3.a, nu = nc + 2 * Ndata, nu tau2 = 1.5^3 + N(c1^2 + c2^2)\n']
+    comments = ['Test run: doing step 3.b, nu = nc + 1, nu tau2 = 1.5^3 + (c1^2 + c2^2) / N\n']
 
     # # # Optional:
     # Set a specific prior? (Default set to None)
