@@ -76,8 +76,8 @@ class SimBaseModel:
         self.Tau = self.Tau_0
         # self.nu = self.nu_0 + (self.cs_data.shape[0] * self.n_c) # Original code
         # self.nu = 1.5 # Step 1.
-        # self.nu = self.nu_0 + (self.cs_data.shape[0] * self.n_c) # Step 2.a + 3.a
-        self.nu = self.nu_0 + self.n_c # Step 2.b + 3.b
+        self.nu = self.nu_0 + (self.cs_data.shape[0] * self.n_c) # Step 2.a + 3.a
+        # self.nu = self.nu_0 + self.n_c # Step 2.b + 3.b
 
 
         # Store the numerator of Q
@@ -427,8 +427,8 @@ class SimBaseModel:
         """
         Returns the value of Tau given Lambda_B and a set of c_tildes.
         """
-        # return np.sqrt((self.nu_0 * self.Tau_0**2 + self.get_c_squared_sum(Lambda_B, c1_tildes, c2_tildes)) / self.nu) # Original code # 3.a
-        return np.sqrt((self.nu_0 * self.Tau_0**2 + self.get_c_squared_sum(Lambda_B, c1_tildes, c2_tildes) / self.cs_data.shape[0]) / self.nu) # Step 3.b
+        return np.sqrt((self.nu_0 * self.Tau_0**2 + self.get_c_squared_sum(Lambda_B, c1_tildes, c2_tildes)) / self.nu) # Original code # 3.a
+        # return np.sqrt((self.nu_0 * self.Tau_0**2 + self.get_c_squared_sum(Lambda_B, c1_tildes, c2_tildes) / self.cs_data.shape[0]) / self.nu) # Step 3.b
     
 
 
@@ -525,49 +525,17 @@ class SimBaseModel:
         # ##############################################################################
         # ############################################################################## STEP 1. END
 
-        ############################################################################## STEP 2. START
-        ##############################################################################
-        ##############################################################################
-        ##############################################################################
-        # # # # # P(Lambda_B | theta, I) = P(Lambda_B | I)
-        # Model evaluations for y1s and y2s
-        y1s = self.cs_theory(params, order = 1)
-
-        # Define the c_tildes (c_ns without the Lambda_B dependency)
-        c1_tildes = (y1s - self.cs_LO_values) / (self.c_denom_1)
-        c2_tildes = np.zeros(self.cs_LO_values.shape[0])
-
-        # Set the scale for the Lambda_B prior
-        vals = []
-        Lambda_Bs = np.linspace(np.max(self.Q_numerator) + 0.00001, 4, 100)
-        for Lambda_B in Lambda_Bs:
-            vals.append(np.log(self.prior_Lambda_B(Lambda_B)) - 
-                        self.nu * np.log(self.get_Tau(Lambda_B, c1_tildes, c2_tildes)) - 
-                        3 * np.sum(np.log(self.Q_numerator / Lambda_B)))
-        self.lambda_b_norm_scale = np.max(np.array(vals))
-
-        lambda_b_log_prior = self.log_prior_Lambda_B(Lambda_B, c1_tildes, c2_tildes)
-
-        # # # # # P(c_bar^2 | Lambda_B, theta, I)
-        Tau = self.get_Tau(Lambda_B, c1_tildes, c2_tildes)
-        c_bar_squared_log_prior = self.log_prior_c_bar_squared(c_bar_squared, Tau)
-        ##############################################################################
-        ##############################################################################
-        ##############################################################################
-        ############################################################################## STEP 2. END
-
-        # ############################################################################## STEP 3.A + B START
+        # ############################################################################## STEP 2. START
         # ##############################################################################
         # ##############################################################################
         # ##############################################################################
         # # # # # # P(Lambda_B | theta, I) = P(Lambda_B | I)
         # # Model evaluations for y1s and y2s
         # y1s = self.cs_theory(params, order = 1)
-        # y2s = self.cs_theory(params, order = 2)
 
         # # Define the c_tildes (c_ns without the Lambda_B dependency)
         # c1_tildes = (y1s - self.cs_LO_values) / (self.c_denom_1)
-        # c2_tildes = (y2s - y1s) / self.c_denom_2
+        # c2_tildes = np.zeros(self.cs_LO_values.shape[0])
 
         # # Set the scale for the Lambda_B prior
         # vals = []
@@ -581,12 +549,44 @@ class SimBaseModel:
         # lambda_b_log_prior = self.log_prior_Lambda_B(Lambda_B, c1_tildes, c2_tildes)
 
         # # # # # # P(c_bar^2 | Lambda_B, theta, I)
-        # self.Tau = self.get_Tau(Lambda_B, c1_tildes, c2_tildes)
-        # c_bar_squared_log_prior = self.log_prior_c_bar_squared(c_bar_squared, self.Tau)
+        # Tau = self.get_Tau(Lambda_B, c1_tildes, c2_tildes)
+        # c_bar_squared_log_prior = self.log_prior_c_bar_squared(c_bar_squared, Tau)
         # ##############################################################################
         # ##############################################################################
         # ##############################################################################
-        # ############################################################################## STEP 3.A + B END
+        # ############################################################################## STEP 2. END
+
+        ############################################################################## STEP 3.A + B START
+        ##############################################################################
+        ##############################################################################
+        ##############################################################################
+        # # # # # P(Lambda_B | theta, I) = P(Lambda_B | I)
+        # Model evaluations for y1s and y2s
+        y1s = self.cs_theory(params, order = 1)
+        y2s = self.cs_theory(params, order = 2)
+
+        # Define the c_tildes (c_ns without the Lambda_B dependency)
+        c1_tildes = (y1s - self.cs_LO_values) / (self.c_denom_1)
+        c2_tildes = (y2s - y1s) / self.c_denom_2
+
+        # Set the scale for the Lambda_B prior
+        vals = []
+        Lambda_Bs = np.linspace(np.max(self.Q_numerator) + 0.00001, 4, 100)
+        for Lambda_B in Lambda_Bs:
+            vals.append(np.log(self.prior_Lambda_B(Lambda_B)) - 
+                        self.nu * np.log(self.get_Tau(Lambda_B, c1_tildes, c2_tildes)) - 
+                        3 * np.sum(np.log(self.Q_numerator / Lambda_B)))
+        self.lambda_b_norm_scale = np.max(np.array(vals))
+
+        lambda_b_log_prior = self.log_prior_Lambda_B(Lambda_B, c1_tildes, c2_tildes)
+
+        # # # # # P(c_bar^2 | Lambda_B, theta, I)
+        self.Tau = self.get_Tau(Lambda_B, c1_tildes, c2_tildes)
+        c_bar_squared_log_prior = self.log_prior_c_bar_squared(c_bar_squared, self.Tau)
+        ##############################################################################
+        ##############################################################################
+        ##############################################################################
+        ############################################################################## STEP 3.A + B END
 
 
         # ############################################################################## ORIGINAL CODE START
