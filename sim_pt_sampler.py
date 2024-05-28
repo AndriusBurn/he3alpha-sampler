@@ -54,7 +54,7 @@ def main():
     use_theory_covs = [True]
 
     # Always write a comment for the run (at least just '\n'!!)
-    comments = ['Test run: doing step 3.a, nu = n0u + 2 N_data, nu tau2 = 1.5^3 + N(c1^2 + c2^2)\n']
+    comments = ['Test run: doing step 3.b, nu = n0u + 2, nu tau2 = 1.5^3 + (c1^2 + c2^2)\n']
 
     # # # Optional:
     # Set a specific prior? (Default set to None)

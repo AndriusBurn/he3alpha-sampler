@@ -76,8 +76,8 @@ class SimBaseModel:
         self.Tau = self.Tau_0
         # self.nu = self.nu_0 + (self.cs_data.shape[0] * self.n_c) # Original code
         # self.nu = 1.5 # Step 1.
-        self.nu = self.nu_0 + (self.cs_data.shape[0] * self.n_c) # Step 2.a + 3.a
-        # self.nu = self.nu_0 + self.n_c # Step 2.b + 3.b
+        # self.nu = self.nu_0 + (self.cs_data.shape[0] * self.n_c) # Step 2.a + 3.a
+        self.nu = self.nu_0 + self.n_c # Step 2.b + 3.b
 
 
         # Store the numerator of Q
@@ -427,8 +427,8 @@ class SimBaseModel:
         """
         Returns the value of Tau given Lambda_B and a set of c_tildes.
         """
-        return np.sqrt((self.nu_0 * self.Tau_0**2 + self.get_c_squared_sum(Lambda_B, c1_tildes, c2_tildes)) / self.nu) # Original code # 3.a
-        # return np.sqrt((self.nu_0 * self.Tau_0**2 + self.get_c_squared_sum(Lambda_B, c1_tildes, c2_tildes) / self.cs_data.shape[0]) / self.nu) # Step 3.b
+        # return np.sqrt((self.nu_0 * self.Tau_0**2 + self.get_c_squared_sum(Lambda_B, c1_tildes, c2_tildes)) / self.nu) # Original code # 3.a
+        return np.sqrt((self.nu_0 * self.Tau_0**2 + self.get_c_squared_sum(Lambda_B, c1_tildes, c2_tildes) / self.cs_data.shape[0]) / self.nu) # Step 3.b
     
 
 
@@ -492,7 +492,6 @@ class SimBaseModel:
         # # # # # P(theta | I)
         ##############################################################################
         params_log_prior = self.log_prior_params(np.concatenate([params, params_f]))
-
 
         # ############################################################################## STEP 0. START
         # ##############################################################################
