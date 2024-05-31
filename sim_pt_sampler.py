@@ -187,21 +187,13 @@ def main():
                         starting_samples[k, j, 0] = tmp1
                         starting_samples[k, j, 1] = tmp2
                         generating_starting_pos = False
-
-        # Count the number of cores
-        cpu_count = mp.cpu_count()
-        cpu_save = 1
-        cpu_use = int(cpu_count - cpu_save)
-        if cpu_use <= 0:
-            sys.stderr('Use less cores!')
-            sys.exit(-1)
-          
+   
         # Useful output statements
         sys.stdout.write('Starting run with {} data {} - {} MeV\n'.format(which_data, E_min, E_max))
         sys.stdout.write('MCMC sampling using emcee (affine invariant ensamble sampler) with {} walkers and {} steps\n'.format(n_walkers, n_step))
         N = data.shape[0]
         sys.stdout.write('The number of input data points are: {}\nThe number of parameters are: {}\n'.format(N, model.total_dim))
-        sys.stdout.write('Sampling will be split across {} cores.\n'.format(cpu_use))
+        # sys.stdout.write('Sampling will be split across {} cores.\n'.format(cpu_use))
         # # # Write useful information to the README
         with open(parent_directory + '/' + subdirectories[i] + '/READ_ME.txt', 'a') as f:
             f.write('\n\nThe number of input data points are: {}\nThe number of parameters are: {}\n'.format(N, model.total_dim))
@@ -209,7 +201,7 @@ def main():
         
         # # # # Initialize the sampler
         sampler = ptemcee.Sampler(n_walkers, model.total_dim, model.log_likelihood, model.log_prior, n_temps,
-                                  threads = cpu_use, 
+                                #   threads = cpu_use, 
                                   betas = betas)
 
         # # # # Run the burn-in and sample
