@@ -35,7 +35,7 @@ def main():
     # # E_min : [0.676, 0.84 , 1.269, 1.741, 2.12 , 2.609, 2.609, 3.586, 4.332, 5.475]
     # # E_max : [0.706, 0.868, 1.292, 1.759, 2.137, 2.624, 2.624, 3.598, 4.342, 5.484]
     E_mins = np.array([0.676]) # MeV
-    E_maxes = np.array([2.624]) # MeV
+    E_maxes = np.array([4.342]) # MeV
     which_datas = ['som']
 
     # Select the parameterizations
@@ -182,16 +182,19 @@ def main():
                 while generating_starting_pos:
                     tmp1 = get_c_bar_squared_start_pos(model.nu_0, model.Tau_0, 0.001, 10)
                     tmp2 = np.random.normal(1, 0.7)
-                    # tmp1 = np.random.normal(0.2401, 0.005)
-                    # tmp2 = np.random.normal(1.0135, 0.01)
-
 
                     if tmp1 > 0.001 and tmp2 > np.max(model.Q_numerator):
                         starting_samples[k, j, 0] = tmp1
                         starting_samples[k, j, 1] = tmp2
                         generating_starting_pos = False
 
-        # import pdb; pdb.set_trace()
+        # Count the number of cores
+        cpu_count = mp.cpu_count()
+        cpu_save = 1
+        cpu_use = int(cpu_count - cpu_save)
+        if cpu_use <= 0:
+            sys.stderr('Use less cores!')
+            sys.exit(-1)
           
         # Useful output statements
         sys.stdout.write('Starting run with {} data {} - {} MeV\n'.format(which_data, E_min, E_max))
@@ -206,7 +209,7 @@ def main():
         
         # # # # Initialize the sampler
         sampler = ptemcee.Sampler(n_walkers, model.total_dim, model.log_likelihood, model.log_prior, n_temps,
-                                #   threads = cpu_use, 
+                                  threads = cpu_use, 
                                   betas = betas)
 
         # # # # Run the burn-in and sample
