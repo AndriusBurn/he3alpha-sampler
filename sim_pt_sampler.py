@@ -201,7 +201,7 @@ def main():
         sys.stdout.write('MCMC sampling using emcee (affine invariant ensamble sampler) with {} walkers and {} steps\n'.format(n_walkers, n_step))
         N = data.shape[0]
         sys.stdout.write('The number of input data points are: {}\nThe number of parameters are: {}\n'.format(N, model.total_dim))
-        # sys.stdout.write('Sampling will be split across {} cores.\n'.format(cpu_use))
+        sys.stdout.write('Sampling will be split across {} cores.\n'.format(cpu_use))
         # # # Write useful information to the README
         with open(parent_directory + '/' + subdirectories[i] + '/READ_ME.txt', 'a') as f:
             f.write('\n\nThe number of input data points are: {}\nThe number of parameters are: {}\n'.format(N, model.total_dim))
