@@ -76,8 +76,8 @@ class SimBaseModel:
         self.Tau = self.Tau_0
         # self.nu = self.nu_0 + (self.cs_data.shape[0] * self.n_c) # Original code
         # self.nu = 1.5 # Step 1.
-        # self.nu = self.nu_0 + (self.cs_data.shape[0] * self.n_c) # Step 2.a + 3.a
-        self.nu = self.nu_0 + self.n_c # Step 2.b + 3.b
+        self.nu = self.nu_0 + (self.cs_data.shape[0] * self.n_c) # Step 2.a + 3.a
+        # self.nu = self.nu_0 + self.n_c # Step 2.b + 3.b
 
 
         # Store the numerator of Q
@@ -427,8 +427,8 @@ class SimBaseModel:
         """
         Returns the value of Tau given Lambda_B and a set of c_tildes.
         """
-        # return np.sqrt((self.nu_0 * self.Tau_0**2 + self.get_c_squared_sum(Lambda_B, c1_tildes, c2_tildes)) / self.nu) # Original code # 3.a
-        return np.sqrt((self.nu_0 * self.Tau_0**2 + self.get_c_squared_sum(Lambda_B, c1_tildes, c2_tildes) / self.cs_data.shape[0]) / self.nu) # Step 3.b
+        return np.sqrt((self.nu_0 * self.Tau_0**2 + self.get_c_squared_sum(Lambda_B, c1_tildes, c2_tildes)) / self.nu) # Original code # 3.a
+        # return np.sqrt((self.nu_0 * self.Tau_0**2 + self.get_c_squared_sum(Lambda_B, c1_tildes, c2_tildes) / self.cs_data.shape[0]) / self.nu) # Step 3.b
     
 
 
@@ -485,7 +485,8 @@ class SimBaseModel:
         params_f = parameters[int(2 + self.erp_dim):]
 
         # c_bar^2 and Lambda_B must be positive nonzero (small values threaten a singular covariance matrix)
-        if (c_bar_squared <= 0.001) or (Lambda_B <= 0.001):
+        # and c_bar^2 needs to be not too large (15 is excessive but allows for the sampler to explore larger c_bar^2s)
+        if (c_bar_squared <= 0.001) or (Lambda_B <= 0.001) or (c_bar_squared >= 15):
             return -np.inf
 
         ##############################################################################
